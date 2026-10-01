@@ -2,13 +2,14 @@
 of St. John's weekly payment vouchers (image-only PDFs, OCR in parse_municipal)."""
 import re
 
-from common import CACHE, DISABLED, fetch, get_text, load_manifest, save_manifest
+from common import CACHE, cache_path, cache_write_text, DISABLED, fetch, get_text, load_manifest, save_manifest
 
 PARADISE = "https://www.paradise.ca/government-engage/cheque-register/"
 STJOHNS = "https://www.stjohns.ca/your-government/access-to-information-and-protection-of-privacy/proactive-disclosures/"
 
 
 def paradise(m: dict) -> None:
+    cache_path(CACHE / "paradise" / "_links.txt")
     html = get_text(PARADISE)
     links = []
     for u in re.findall(r'href="([^"]+\.pdf)"', html, re.I):
@@ -21,12 +22,12 @@ def paradise(m: dict) -> None:
         # each register from its own payment dates, so the file name is just the URL slug
         slug = "-".join(u.split("/")[-2:])
         fetch(u, CACHE / "paradise" / slug, manifest=m)
-    (CACHE / "paradise").mkdir(parents=True, exist_ok=True)  # a fresh cache has no folder yet
-    (CACHE / "paradise" / "_links.txt").write_text("\n".join(links))
+    cache_write_text(CACHE / "paradise" / "_links.txt", "\n".join(links))
     print(f"paradise: {len(links)} unique links")
 
 
 def stjohns(m: dict) -> None:
+    cache_path(CACHE / "stjohns" / "_links.txt")
     html = get_text(STJOHNS)
     links = []
     for u in re.findall(r'href="([^"]+\.pdf)"', html, re.I):
@@ -34,8 +35,7 @@ def stjohns(m: dict) -> None:
             u = "https://www.stjohns.ca" + u
         if u not in links:
             links.append(u)
-    (CACHE / "stjohns").mkdir(parents=True, exist_ok=True)  # a fresh cache has no folder yet
-    (CACHE / "stjohns" / "_links.txt").write_text("\n".join(links))
+    cache_write_text(CACHE / "stjohns" / "_links.txt", "\n".join(links))
     vouchers = [u for u in links if re.search(r"voucher|payment", u, re.I)]
     print(f"st. john's: {len(links)} pdf links, {len(vouchers)} look like payment vouchers")
     for u in vouchers[:6]:  # a sample: the most recent weeks listed first

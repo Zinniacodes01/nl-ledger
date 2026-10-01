@@ -37,6 +37,10 @@ jobs:
         run: node site/check-mcp.mjs
       - name: Federal evidence across HTML, shares, shards and MCP
         run: node site/check-federal.mjs
+      - name: Imported source text is escaped
+        run: node site/check-source-escaping.mjs
+      - name: Receipt income privacy checks
+        run: node site/check-receipt-privacy.mjs
       - name: Feedback box checks
         # The endpoint's rules (what is stored, what is refused, nothing echoed), with stand-ins for D1, mail and Turnstile.
         run: node site/check-feedback.mjs
@@ -73,3 +77,10 @@ jobs:
       - name: Federal source evidence and amendment-chain counterexamples
         working-directory: pipeline
         run: uv run --no-sync python check_federal.py
+
+      - name: Source download cache confinement
+        working-directory: pipeline
+        run: uv run --no-sync python check_downloads.py
+      - name: Imported currency validation and original evidence
+        working-directory: pipeline
+        run: uv run --no-sync python check_currency.py

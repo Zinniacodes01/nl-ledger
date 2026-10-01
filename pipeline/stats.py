@@ -9,7 +9,7 @@ import csv
 import json
 import zipfile
 
-from common import CACHE, CLEAN, fetch, load_manifest, save_manifest
+from common import CACHE, cache_path, CLEAN, fetch, load_manifest, save_manifest
 
 STATCAN = {
     "14100064": "Employee wages by industry, annual",
@@ -42,10 +42,11 @@ NL_TAX_2025 = {
 
 
 def read_csv(table):
-    path = CACHE / "statcan" / f"{table}.csv"
+    path = cache_path(CACHE / "statcan" / f"{table}.csv")
     if not path.exists():
-        with zipfile.ZipFile(CACHE / "statcan" / f"{table}.zip") as z:
-            z.extract(f"{table}.csv", CACHE / "statcan")
+        with zipfile.ZipFile(cache_path(CACHE / "statcan" / f"{table}.zip")) as z:
+            cache_path(path)
+            z.extract(f"{table}.csv", path.parent)
     with open(path, encoding="utf-8-sig", newline="") as fh:
         yield from csv.DictReader(fh)
 

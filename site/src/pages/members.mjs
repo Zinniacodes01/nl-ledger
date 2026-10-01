@@ -28,7 +28,7 @@ export function members(D, R) {
 
   const idxBody = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], [null, "Members"]], title: "MHA expenses and minister expense claims", lede: "What each Member of the House of Assembly (MHA) claimed against their office, travel and constituency allowances, and what each minister claimed in expenses, line by line as the House and Executive Council publish it." })}
 <section class="section"><div class="wrap grid-2">
-  <div><div class="section-head"><h2>MHA spending, ${latestFull}</h2><p>Office, travel and constituency allowances. The House publishes a limit for most categories; <a href="/flags/over-allowance/">no member went past one</a>. Members who served part of the year, or who are ministers or party leaders with other budgets, spend less from these allowances, so the list is not a ranking of thrift.</p></div>
+  <div><div class="section-head"><h2>MHA spending, ${esc(latestFull)}</h2><p>Office, travel and constituency allowances. The House publishes a limit for most categories; <a href="/flags/over-allowance/">no member went past one</a>. Members who served part of the year, or who are ministers or party leaders with other budgets, spend less from these allowances, so the list is not a ranking of thrift.</p></div>
   ${schedule({ compact: true, cols: [{ label: "Member" }, { label: "", w: "36%" }, { label: "Spent", num: true }], rows: ranked.map((m) => ({ cells: [`<a href="/mha/${D.slug(m.person)}/">${esc(nameOrder(m.person))}</a><span class="meta">${esc(m.district || "")}</span>`, bar(perYear.get(m.person)[latestFull], rmax), money(perYear.get(m.person)[latestFull])] })) })}
   </div>
   <div><div class="section-head"><h2>Ministers' claims</h2><p>Travel, meals, accommodation and car allowance paid to cabinet ministers, December 2020 to May 2026.</p></div>
@@ -58,11 +58,11 @@ export function members(D, R) {
     const vendors = D.q("SELECT supplier, supplier_key, count(*) n, sum(amount) a FROM items WHERE dataset='mha' AND person=? AND supplier IS NOT NULL GROUP BY supplier_key ORDER BY a DESC LIMIT 12", m.person);
     const big = lines.slice().sort((a, b) => (b.amount || 0) - (a.amount || 0)).slice(0, 25);
     const phash = D.keyHash(m.person.toLowerCase());
-    const body = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/members/", "Members"], [null, nameOrder(m.person)]], title: esc(nameOrder(m.person)), lede: `Member of the House of Assembly for ${esc(m.district || "a district")}. ${num(m.n)} expense lines from ${m.y0} to ${m.y1}, ${money(m.amount)} in all.` })}
+    const body = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/members/", "Members"], [null, nameOrder(m.person)]], title: esc(nameOrder(m.person)), lede: `Member of the House of Assembly for ${esc(m.district || "a district")}. ${num(m.n)} expense lines from ${esc(m.y0)} to ${esc(m.y1)}, ${money(m.amount)} in all.` })}
 <section class="section"><div class="wrap">
   ${yrs.map((y) => {
     const cats = [...byYearCat.values()].filter((e) => e.y === y).sort((a, b) => b.a - a.a);
-    return schedule({ caption: `${y}`, compact: true, cols: [{ label: "Allowance category" }, { label: "Lines", num: true }, { label: "Spent", num: true }, { label: "Source", num: true }],
+    return schedule({ caption: esc(y), compact: true, cols: [{ label: "Allowance category" }, { label: "Lines", num: true }, { label: "Spent", num: true }, { label: "Source", num: true }],
       rows: cats.map((c) => ({ cells: [esc(c.cat), num(c.n), money(c.a, { cents: true }), receipt(c.url, c.page)] })),
       foot: [{ cells: ["Total", num(cats.reduce((s, c) => s + c.n, 0)), money(cats.reduce((s, c) => s + c.a, 0), { cents: true }), ""] }] });
   }).join('<div style="block-size:2rem"></div>')}
@@ -71,7 +71,7 @@ export function members(D, R) {
   <div><h2 style="margin-block-end:1rem">Paid to</h2>
   ${schedule({ compact: true, cols: [{ label: "Vendor as printed" }, { label: "Lines", num: true }, { label: "Paid", num: true }], rows: vendors.map((v) => ({ cells: [`<a href="/supplier/${D.keyHash(v.supplier_key)}/">${esc(v.supplier)}</a>`, num(v.n), money(v.a)] })) })}</div>
   <div><h2 style="margin-block-end:1rem">Largest lines</h2>
-  ${schedule({ compact: true, cols: [{ label: "Line" }, { label: "Amount", num: true }, { label: "Source", num: true }], rows: big.map((l) => ({ cells: [`${esc(l.supplier || "")}<span class="meta">${esc(l.description || "")} · ${esc(l.method)} · ${fmtDate(l.date)}</span>`, money(l.amount, { cents: true }), receipt(l.source_url, l.page, l.locator)] })) })}
+  ${schedule({ compact: true, cols: [{ label: "Line" }, { label: "Amount", num: true }, { label: "Source", num: true }], rows: big.map((l) => ({ cells: [`${esc(l.supplier || "")}<span class="meta">${esc(l.description || "")} · ${esc(l.method)} · ${esc(fmtDate(l.date))}</span>`, money(l.amount, { cents: true }), receipt(l.source_url, l.page, l.locator)] })) })}
   <p><a href="/search/?ds=mha&p=${phash}">Search all ${num(m.n)} lines ${icon("arrow")}</a></p></div>
 </div></section>
 <div class="wrap">${spotError()}</div>`;
@@ -95,7 +95,7 @@ export function members(D, R) {
       const x = JSON.parse(c.extra || "{}");
       for (const k of Object.keys(cats)) cats[k] += x[k] || 0;
     }
-    const body = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/members/", "Members"], [null, m.person]], title: esc(m.person), lede: `Minister's expense claims paid from ${fmtDate(m.d0)} to ${fmtDate(m.d1)}: ${num(m.n)} lines, ${money(m.amount, { cents: true })}. Departments: ${depts.map(esc).join("; ")}.` })}
+    const body = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/members/", "Members"], [null, m.person]], title: esc(m.person), lede: `Minister's expense claims paid from ${esc(fmtDate(m.d0))} to ${esc(fmtDate(m.d1))}: ${num(m.n)} lines, ${money(m.amount, { cents: true })}. Departments: ${depts.map(esc).join("; ")}.` })}
 <section class="section"><div class="wrap grid-2">
   <div><h2 style="margin-block-end:1rem">What the travel claims were for</h2>
   ${leaders([
@@ -114,7 +114,7 @@ export function members(D, R) {
   ${schedule({ cols: [{ label: "Purpose" }, { label: "Date", w: "7.5rem" }, { label: "Amount", num: true }, { label: "Source", num: true }],
     rows: claims.map((c) => {
       const x = JSON.parse(c.extra || "{}");
-      return { cells: [`${esc(c.description)}${x.routes ? `<span class="meta">${esc(x.routes)}</span>` : ""}<span class="meta">${esc(c.method)} · ${esc(c.buyer)}</span>`, fmtDate(c.date), money(c.amount, { cents: true }), receipt(c.source_url, c.page, c.locator)] };
+      return { cells: [`${esc(c.description)}${x.routes ? `<span class="meta">${esc(x.routes)}</span>` : ""}<span class="meta">${esc(c.method)} · ${esc(c.buyer)}</span>`, esc(fmtDate(c.date)), money(c.amount, { cents: true }), receipt(c.source_url, c.page, c.locator)] };
     }) })}
 </div></section>
 <div class="wrap">${spotError()}</div>`;

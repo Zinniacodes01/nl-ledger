@@ -34,18 +34,18 @@ export function bodies(D, R) {
     });
 
     const body = html`
-${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/bodies/", "Public bodies"], [null, b.buyer]], title: esc(b.buyer), lede: `${num(b.n)} records, ${moneyWords(b.amount)} in CAD published record values across all years, from ${sets.map(datasetLabel).map((s) => s.toLowerCase()).join(", ")}.${sets.length > 1 ? " Sources can overlap; this sum is not a deduplicated spending total." : ""} Values are not total money paid.${dept ? ` <a href="/department/${D.slug(dept.name)}/">Program spending for ${esc(dept.name)}</a>.` : ""}` })}
+${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/bodies/", "Public bodies"], [null, b.buyer]], title: esc(b.buyer), lede: `${num(b.n)} records, ${moneyWords(b.amount)} in CAD published record values across all years, from ${sets.map(datasetLabel).map((s) => esc(s.toLowerCase())).join(", ")}.${sets.length > 1 ? " Sources can overlap; this sum is not a deduplicated spending total." : ""} Values are not total money paid.${dept ? ` <a href="/department/${D.slug(dept.name)}/">Program spending for ${esc(dept.name)}</a>.` : ""}` })}
 <section class="section"><div class="wrap grid-2">
   <div>
     <h2 style="margin-block-end:1rem">What is on record</h2>
     ${b.level === "federal" ? caveat(`${FEDERAL_RULE} CAD totals cover only supported CAD amounts. These are selected records, not all the department’s activity. Notices and disclosures can overlap; combined record values are not spending totals.`) : ""}
     ${sets.includes("ppa") ? caveat("These are published contract award reports, not a complete ledger of this body's purchases or payments. This page shows the body as buyer; money it receives as a supplier or grant recipient belongs in a separate search.") : ""}
-    ${leaders(byDs.map((d) => ({ label: `${esc(datasetLabel(d.dataset))} <span class="muted small">${num(d.n)}, ${fmtDate(d.d0)} to ${fmtDate(d.d1)}</span>`, value: moneyWords(d.amount) })))}
-    ${flagNotes.length ? html`<h3 style="margin-block:2rem .6rem">Patterns</h3><ul class="prose">${flagNotes.map((t, i) => `<li>${t} <a href="/flags/${subjectFlags[i].flag}/">How this is worked out</a></li>`)}</ul>${caveat("A flag is a question, not a finding. It is not evidence that anything wrong happened.")}` : ""}
+    ${leaders(byDs.map((d) => ({ label: `${esc(datasetLabel(d.dataset))} <span class="muted small">${num(d.n)}, ${esc(fmtDate(d.d0))} to ${esc(fmtDate(d.d1))}</span>`, value: moneyWords(d.amount) })))}
+    ${flagNotes.length ? html`<h3 style="margin-block:2rem .6rem">Patterns</h3><ul class="prose">${flagNotes.map((t, i) => `<li>${t} <a href="/flags/${esc(subjectFlags[i].flag)}/">How this is worked out</a></li>`)}</ul>${caveat("A flag is a question, not a finding. It is not evidence that anything wrong happened.")}` : ""}
   </div>
   <div>
     ${methods.length > 1 ? html`<h3 style="margin-block-end:.8rem">Reported procurement methods</h3><p class="small">CAD record values, all years; sources can overlap. Federal addresses do not locate work or benefits.</p>${schedule({ compact: true, cols: [{ label: "Method" }, { label: "", w: "40%" }, { label: "Awards", num: true }, { label: "Value", num: true }], rows: methods.map((m) => ({ cells: [esc(m.m), bar(m.amount || 0, mmax), num(m.n), moneyWords(m.amount || 0)] })) })}` : ""}
-    ${byYear.length > 1 ? html`<h3 style="margin-block:1.5rem .8rem">By original record date</h3><p class="small">CAD reported values, not annual payments. Sources can overlap; federal addresses do not locate work or benefits.</p>${schedule({ compact: true, cols: [{ label: "Year" }, { label: "", w: "50%" }, { label: "Value", num: true }], rows: byYear.map((y) => ({ cells: [y.y, bar(y.amount || 0, ymax), moneyWords(y.amount || 0)] })) })}` : ""}
+    ${byYear.length > 1 ? html`<h3 style="margin-block:1.5rem .8rem">By original record date</h3><p class="small">CAD reported values, not annual payments. Sources can overlap; federal addresses do not locate work or benefits.</p>${schedule({ compact: true, cols: [{ label: "Year" }, { label: "", w: "50%" }, { label: "Value", num: true }], rows: byYear.map((y) => ({ cells: [esc(y.y), bar(y.amount || 0, ymax), moneyWords(y.amount || 0)] })) })}` : ""}
   </div>
 </div></section>
 ${b.level === "federal" ? `<section class="section"><div class="wrap">${federalSummary(D, "buyer_key=? AND dataset IN ('fed_contract','fed_grant','canadabuys')", b.buyer_key)}</div></section>` : ""}
@@ -135,7 +135,7 @@ function smallPurchases(D, R) {
   const body = html`${pagehead({ crumbs: [["/", "Home"], [null, "Small purchases"]], title: "The small purchases", lede: "Most public money goes out in amounts too small to make a contract report. Two municipalities publish every payment; the province does not." })}
 <section class="section"><div class="wrap">
   <div class="figs">
-    <div><span class="big">${num(p.n)}</span><span class="what">payments by the Town of Paradise, ${fmtDate(p.d0)} to ${fmtDate(p.d1)}${citeP}</span></div>
+    <div><span class="big">${num(p.n)}</span><span class="what">payments by the Town of Paradise, ${esc(fmtDate(p.d0))} to ${esc(fmtDate(p.d1))}${citeP}</span></div>
     <div><span class="big">${money(median)}</span><span class="what">the middle payment</span></div>
     <div><span class="big">${pct(under1k / p.n)}</span><span class="what">of payments were under $1,000</span></div>
   </div>
@@ -143,7 +143,7 @@ function smallPurchases(D, R) {
 </div></section>
 <section class="section"><div class="wrap grid-2">
   <div><h2 style="margin-block-end:1rem">Paradise, month by month</h2>
-  ${schedule({ compact: true, cols: [{ label: "Month" }, { label: "", w: "55%" }, { label: "Paid", num: true }], rows: months.map((m) => ({ cells: [fmtDate(m.m), bar(m.amount, mmax), moneyWords(m.amount)] })) })}</div>
+  ${schedule({ compact: true, cols: [{ label: "Month" }, { label: "", w: "55%" }, { label: "Paid", num: true }], rows: months.map((m) => ({ cells: [esc(fmtDate(m.m)), bar(m.amount, mmax), moneyWords(m.amount)] })) })}</div>
   <div><h2 style="margin-block-end:1rem">Paradise's biggest vendors</h2>
   ${schedule({ compact: true, cols: [{ label: "Vendor" }, { label: "Payments", num: true }, { label: "Paid", num: true }], rows: vendors.map((v) => ({ cells: [`<a href="/supplier/${D.keyHash(v.supplier_key)}/">${esc(v.supplier)}</a>`, num(v.n), moneyWords(v.amount)] })) })}
   <h3 style="margin-block:2rem .8rem">What gets bought most often</h3>

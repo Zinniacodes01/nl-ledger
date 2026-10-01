@@ -8,7 +8,7 @@
 import json
 import urllib.parse
 
-from common import CACHE, fetch, is_stale, load_manifest, save_manifest, sha256, _session
+from common import CACHE, cache_path, fetch, is_stale, load_manifest, save_manifest, sha256, _session
 
 # The publishers replace these files in place, so a weekly run fetches them again.
 MAX_AGE_DAYS = 6
@@ -27,11 +27,12 @@ GRANTS = "1d15a62f-5656-49ad-8c88-f40ce689d831"
 
 
 def fetch_grants(m: dict) -> None:
-    dest = CACHE / "federal" / "grants_NL.jsonl"
+    dest = cache_path(CACHE / "federal" / "grants_NL.jsonl")
+    tmp = cache_path(dest.with_suffix(".part"))
+    dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists() and dest.stat().st_size > 0 and not is_stale("federal/grants_NL.jsonl", m, MAX_AGE_DAYS):
         return
     off, n = 0, 0
-    tmp = dest.with_suffix(".part")
     with open(tmp, "w") as out:
         while True:
             q = urllib.parse.urlencode({
@@ -50,7 +51,7 @@ def fetch_grants(m: dict) -> None:
             off += len(recs)
             n += len(recs)
             print(f"  grants: {n}")
-    tmp.rename(dest)
+    cache_path(tmp).rename(cache_path(dest))
     from datetime import datetime, timezone
     m["federal/grants_NL.jsonl"] = {
         "url": f"https://open.canada.ca/data/en/dataset/432527ab-7aac-45b5-81d6-7597107a7013/resource/{GRANTS}",

@@ -43,7 +43,7 @@ export function home(D, R, B) {
   <div class="cover-in">
     <h1 id="cover-h" class="cover-title">The Newfoundland and Labrador government spent</h1>
     <p class="cover-fig">${moneyWords(total)}${cite}</p>
-    <p class="cover-sub">in ${fy}. That is <em>${money(perPerson(total, S))}</em> for every person in the province${citePop}, or what <em>${num(people)}</em> people earning the median full-time wage make in a year${citeWage}.</p>
+    <p class="cover-sub">in ${esc(fy)}. That is <em>${money(perPerson(total, S))}</em> for every person in the province${citePop}, or what <em>${num(people)}</em> people earning the median full-time wage make in a year${citeWage}.</p>
     <details class="cover-budget">
       <summary>Budget, deficit and debt</summary>
       ${ledger}
@@ -73,9 +73,9 @@ export function home(D, R, B) {
     <figure class="qa-fig">
     <dl class="qa">
       <div><dt>Asked</dt><dd class="qa-q">${esc(EXAMPLE.q)}</dd></div>
-      <div><dt>${esc(EXAMPLE.by)} answered</dt><dd class="qa-a"><p>${esc(EXAMPLE.a)}</p><p class="qa-src"><a href="${esc(EXAMPLE.source.href)}" rel="noopener">${esc(EXAMPLE.source.label)} ${icon("out")}</a> · <a href="${EXAMPLE.record}">The record on this site</a></p></dd></div>
+      <div><dt>${esc(EXAMPLE.by)} answered</dt><dd class="qa-a"><p>${esc(EXAMPLE.a)}</p><p class="qa-src"><a href="${esc(EXAMPLE.source.href)}" rel="noopener">${esc(EXAMPLE.source.label)} ${icon("out")}</a> · <a href="${esc(EXAMPLE.record)}">The record on this site</a></p></dd></div>
     </dl>
-    <figcaption>A real answer from ${esc(EXAMPLE.by)} (in ${esc(EXAMPLE.via)}) connected to this site on ${fmtDate(EXAMPLE.on)}. Only the source link it ended with has been moved below the text.</figcaption>
+    <figcaption>A real answer from ${esc(EXAMPLE.by)} (in ${esc(EXAMPLE.via)}) connected to this site on ${esc(fmtDate(EXAMPLE.on))}. Only the source link it ended with has been moved below the text.</figcaption>
     </figure>
   </div>
 </section>`;
@@ -88,8 +88,8 @@ export function home(D, R, B) {
         <h2 id="rc-h">Your receipt</h2>
         <p class="lede">Enter employment income to estimate provincial income tax and illustrate its share of spending, department by department.</p>
       </div>
-      <p>The receipt estimates ${S.nl_tax.year} Newfoundland and Labrador income tax${citeTax}, then spreads it the way the province spread all its spending in ${fy}. Health got ${pct(depts[0].share)} of every dollar spent, so ${pct(depts[0].share)} of the estimated tax is shown there.</p>
-      <p class="muted small">Personal income tax brought in ${pct(S.provincial_government.personal_income_tax / S.provincial_government.revenue)} of provincial revenue in ${S.provincial_government.year}${citeRev}; sales taxes, federal transfers and resource revenue pay most of the rest. The receipt illustrates spending shares; it does not trace an individual’s tax payments. <a href="/method/receipt/">How the receipt works</a>.</p>
+      <p>The receipt estimates ${esc(S.nl_tax.year)} Newfoundland and Labrador income tax${citeTax}, then spreads it the way the province spread all its spending in ${esc(fy)}. Health got ${pct(depts[0].share)} of every dollar spent, so ${pct(depts[0].share)} of the estimated tax is shown there.</p>
+      <p class="muted small">Personal income tax brought in ${pct(S.provincial_government.personal_income_tax / S.provincial_government.revenue)} of provincial revenue in ${esc(S.provincial_government.year)}${citeRev}; sales taxes, federal transfers and resource revenue pay most of the rest. The receipt illustrates spending shares; it does not trace an individual’s tax payments. <a href="/method/receipt/">How the receipt works</a>.</p>
       ${receiptForm({ id: "inc2", value: num(median) })}
     </div>
     <div data-receipt-out>${renderReceipt(R, median, S)}</div>
@@ -101,10 +101,10 @@ export function home(D, R, B) {
   <div class="wrap">
     <div class="section-head">
       <h2 id="life-h">What a working life buys</h2>
-      <p class="lede">Someone earning the median full-time wage here, ${money(median)} a year, makes about ${moneyWords(career)} over a 40-year career. In ${fy} the province spent that much every ${h} hours and ${m} minutes.</p>
+      <p class="lede">Someone earning the median full-time wage here, ${money(median)} a year, makes about ${moneyWords(career)} over a 40-year career. In ${esc(fy)} the province spent that much every ${h} hours and ${m} minutes.</p>
     </div>
     <div style="max-inline-size:40rem;margin-block-end:2.5rem">${leaders([
-      { label: `Provincial spending for every resident, ${fy.replace("-", "\u2011")}`, value: money(perPerson(total, S)) },
+      { label: `Provincial spending for every resident, ${esc(fy.replace("-", "\u2011"))}`, value: money(perPerson(total, S)) },
       { label: `Provincial spending for every household${citeHH}`, value: money(perHousehold(total, S)) },
       { label: "Provincial spending every hour, around the clock, all year", value: moneyWords(perHour, 1) },
       { label: "A 40-year career at the median wage", value: moneyWords(career), cls: "total" },
@@ -121,13 +121,13 @@ export function home(D, R, B) {
   <div class="wrap">
     <div class="section-head">
       <h2 id="pr-h">Priorities</h2>
-      <p class="lede">Where the provincial dollar went in ${fy}, set against what the budget said it would cost.</p>
+      <p class="lede">Where the provincial dollar went in ${esc(fy)}, set against what the budget said it would cost.</p>
     </div>
     <ul class="legend"><li><span class="sw"></span>Spent (actual)</li><li><span class="sw ghost"></span>Budgeted (original estimate)</li></ul>
     <p class="sched-hint">Scroll sideways for more columns.</p><div class="sched-wrap"><table class="sched pin-rows">
       <thead><tr><th scope="col">Department</th><th scope="col" class="hide-sm" style="inline-size:36%">Spent against budget</th><th scope="col" class="n">Spent</th><th scope="col" class="n">Budgeted</th><th scope="col" class="n hide-sm">Per person</th></tr></thead>
       <tbody>${top.map((d) => html`<tr>
-        <th scope="row"><a href="/department/${d.slug}/">${esc(d.name)}</a></th>
+        <th scope="row"><a href="/department/${esc(d.slug)}/">${esc(d.name)}</a></th>
         <td class="hide-sm"><span class="pair">${bar(d.gross, max)}${d.original != null ? bar(d.original, max, "ghost") : ""}</span></td>
         <td class="n">${moneyWords(d.gross)}</td>
         <td class="n">${d.original ? moneyWords(d.original) : "not printed"}</td>
@@ -139,7 +139,7 @@ export function home(D, R, B) {
       </tbody>
       <tfoot><tr class="total"><th scope="row">All ${depts.length} departments</th><td class="hide-sm"></td><td class="n">${moneyWords(total)}</td><td class="n">${moneyWords(depts.reduce((s, d) => s + (d.original || 0), 0))}</td><td class="n hide-sm">${money(perPerson(total, S))}</td></tr></tfoot>
     </table></div>
-    <p style="margin-block-start:1.5rem"><a href="/priorities/">Every department and program, ${D.years[0]} to ${fy} ${icon("arrow")}</a> · <a href="/budget/">Budget against actual, the deficit and net debt</a></p>
+    <p style="margin-block-start:1.5rem"><a href="/priorities/">Every department and program, ${esc(D.years[0])} to ${esc(fy)} ${icon("arrow")}</a> · <a href="/budget/">Budget against actual, the deficit and net debt</a></p>
   </div>
 </section>`;
 
@@ -157,7 +157,7 @@ export function home(D, R, B) {
       </form>
       <ul class="chips" style="margin-block-start:1rem">${R.suggestions.map((s) => `<li><a href="/search/?q=${encodeURIComponent(s)}">${esc(s)}</a></li>`)}</ul>
       <h3 style="margin-block:2rem .8rem">Source summaries, all years</h3>
-      ${leaders(levelTotals.map((l) => ({ label: `<span class="sw lv-${l.level}"></span>${esc(l.label)}`, value: moneyWords(l.amount) })))}
+      ${leaders(levelTotals.map((l) => ({ label: `<span class="sw lv-${esc(l.level)}"></span>${esc(l.label)}`, value: moneyWords(l.amount) })))}
       <p class="small muted" style="margin-block-start:.8rem">Federal records are selected by reported supplier or recipient addresses, including labelled conflicts. Addresses do not establish where work, benefits or spending occurred; no NL share is inferred. These are whole reported commitments, not amounts paid. Sources and agreements can overlap and cover different years: do not add them as a spending total. Major transfers are separate context on the <a href="/federal/">federal page</a>. Provincial records include awards, expense claims and pay. <a href="/sources/">What each source covers</a>.</p>
     </div>
     <div>
@@ -165,7 +165,7 @@ export function home(D, R, B) {
       <p class="small">Each source is ranked separately across all years. Agreements and sources can overlap: these values are not total receipts or spending in NL. Federal address selection does not locate the work or benefit; read the location evidence on each record.</p>
       <p class="sched-hint">Scroll sideways for more columns.</p><div class="sched-wrap"><table class="sched pin-rows compact">
         <thead><tr><th scope="col">Recipient</th><th scope="col" class="n">On record</th></tr></thead>
-        <tbody>${R.topRecipients.map((r) => html`<tr><th scope="row"><a href="${r.href}">${esc(r.name)}</a><span class="meta">${esc(r.sources)}</span></th><td class="n">${moneyWords(r.amount)}</td></tr>`)}</tbody>
+        <tbody>${R.topRecipients.map((r) => html`<tr><th scope="row"><a href="${esc(r.href)}">${esc(r.name)}</a><span class="meta">${esc(r.sources)}</span></th><td class="n">${moneyWords(r.amount)}</td></tr>`)}</tbody>
       </table></div>
       <p class="small muted">Contract values and grant agreement values as reported, which can span several years; not money paid in one year. Federal major transfers to the provincial government (health, social) are not in this list; they are on the <a href="/federal/">federal page</a>.</p>
     </div>

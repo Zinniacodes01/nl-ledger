@@ -1,3 +1,4 @@
+import { feedbackContext } from "../lib/privacy.mjs";
 // The feedback box's endpoint (NOTES.md "Feedback box"). POST /feedback stores a visitor's note in the
 // D1 table `feedback` and emails it; GET /feedback/ is the form on a page of its own; /feedback/sent/ is the thank-you.
 // A note is only ever shown back to the person who typed it, in a response marked no-store.
@@ -23,7 +24,7 @@ const clip = (s, n) => [...s].slice(0, n).join("");
 export function cleanPage(p) {
   const s = String(p ?? "").replace(/[\u0000-\u001f\u007f]/g, "");
   // One leading slash and no backslash anywhere: browsers read "/\\host" as another site.
-  return /^\/(?!\/)/.test(s) && !s.includes("\\") ? clip(s, 300) : "";
+  return /^\/(?!\/)/.test(s) && !s.includes("\\") ? clip(feedbackContext(s), 300) : "";
 }
 function read(form, request) {
   const get = (k) => String(form.get(k) ?? "");
@@ -192,13 +193,18 @@ Sent from the feedback box on ${SITE.url.replace("https://", "")}. Replying to t
   }
 }
 
+// D1 serializes writes; capacity is checked inside the same statement as insertion.
+export const FEEDBACK_INSERT_QUERY = `INSERT INTO feedback (created, kind, page, note, email, checked, nonce)
+SELECT ?, ?, ?, ?, ?, ?, ?
+WHERE (SELECT count(*) FROM feedback WHERE created > ?) < ?
+  AND (? != 'confirm' OR (SELECT count(*) FROM feedback WHERE created > ? AND checked = 'confirm') < ?)
+ON CONFLICT(nonce) DO NOTHING RETURNING id`;
+
 async function store(ctx, f, checked, nonce, ip) {
   const { env } = ctx;
   const now = new Date();
   // The same token sent twice (a double press, a reload): already stored, nothing more to do or to count.
   if (await env.DB.prepare("SELECT 1 FROM feedback WHERE nonce = ?").bind(nonce).first()) return "stored";
-  const recent = await env.DB.prepare("SELECT count(*) n, sum(checked = 'confirm') c FROM feedback WHERE created > ?").bind(new Date(now - 86_400_000).toISOString()).first();
-  if ((recent?.n ?? 0) >= DAY_CAP || (checked === "confirm" && (recent?.c ?? 0) >= CONFIRM_DAY_CAP)) return "full";
   const created = now.toISOString();
   if (ip) {
     const day = created.slice(0, 10);
@@ -208,9 +214,11 @@ async function store(ctx, f, checked, nonce, ip) {
     ctx.waitUntil(env.DB.prepare("DELETE FROM feedback_seen WHERE day < ?").bind(new Date(now - 86_400_000).toISOString().slice(0, 10)).run().catch(() => {}));
     if (seen.n > ADDRESS_DAY_CAP) return "many";
   }
-  const row = await env.DB.prepare("INSERT INTO feedback (created, kind, page, note, email, checked, nonce) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(nonce) DO NOTHING RETURNING id")
-    .bind(created, f.kind, f.page, f.note, f.email, checked, nonce).first();
-  if (!row) return "stored";
+  const row = await env.DB.prepare(FEEDBACK_INSERT_QUERY)
+    .bind(created, f.kind, f.page, f.note, f.email, checked, nonce,
+      new Date(now - 86_400_000).toISOString(), DAY_CAP, checked,
+      new Date(now - 86_400_000).toISOString(), CONFIRM_DAY_CAP).first();
+  if (!row) return await env.DB.prepare("SELECT 1 FROM feedback WHERE nonce = ?").bind(nonce).first() ? "stored" : "full";
   ctx.waitUntil((async () => {
     const mail = await email(env, { ...f, id: row.id, created });
     await env.DB.prepare("UPDATE feedback SET mail = ? WHERE id = ?").bind(mail, row.id).run();

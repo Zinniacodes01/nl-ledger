@@ -1,3 +1,4 @@
+import { feedbackContext } from "./privacy.mjs";
 // Page shell and the accounting-schedule components. Used by the static build and by
 // the Worker routes, so every page, static or rendered on request, is one design.
 import { mobileTables } from "./tables.mjs";
@@ -81,7 +82,7 @@ export function receipt(url, page, locator, label) {
   if (!url) return "";
   const pdf = /\.pdf($|\?)/i.test(url);
   const href = pdf && page ? `${url}#page=${page}` : url;
-  const text = label ? esc(label) : pdf && page ? `p.&nbsp;${page}` : "source";
+  const text = label ? esc(label) : pdf && page ? `p.&nbsp;${esc(page)}` : "source";
   return `<a class="rcpt" href="${esc(href)}" rel="noopener" title="${esc(locator || "Open the source record")}">${text}</a>`;
 }
 
@@ -151,7 +152,7 @@ const TURNSTILE_SITEKEY = globalThis.process?.env?.NL_LEDGER_TURNSTILE_SITEKEY |
 // when the server hands a visitor's own note back to them to fix.
 export function feedbackForm({ page = "/", note = "", email = "", kind = "", error = "", field = "" } = {}) {
   return `<form class="fb-form" action="/feedback" method="post" data-feedback data-sitekey="${TURNSTILE_SITEKEY}">
-    <input type="hidden" name="page" value="${esc(page)}">
+    <input type="hidden" name="page" value="${esc(feedbackContext(page))}">
     ${error ? `<p class="fb-error" id="fb-error" role="alert">${icon("query")}<span>${esc(error)}</span></p>` : ""}
     <fieldset class="fb-kinds">
       <legend>What kind of note is it? <span class="fb-opt">Optional</span></legend>

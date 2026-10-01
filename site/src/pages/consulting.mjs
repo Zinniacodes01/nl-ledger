@@ -19,7 +19,7 @@ export function consulting(D, R) {
   const src = byDept[0];
   const cite = notes.cite({ url: src.source_url, label: `Report on the Program Expenditures and Revenues of the Consolidated Revenue Fund ${latest.y}, object "Professional Services", all programs` });
   const vmax = Math.max(...byYear.map((r) => r.v), 1);
-  const body = html`${pagehead({ crumbs: [["/", "Home"], [null, "Consultants and professional services"]], title: "Government consultants and professional services spending", lede: `The province's own accounts put spending on outside expertise, such as consultants, in one line called Professional Services. In ${latest.y} it came to ${moneyWords(latest.v)}${cite}.` })}
+  const body = html`${pagehead({ crumbs: [["/", "Home"], [null, "Consultants and professional services"]], title: "Government consultants and professional services spending", lede: `The province's own accounts put spending on outside expertise, such as consultants, in one line called Professional Services. In ${esc(latest.y)} it came to ${moneyWords(latest.v)}${cite}.` })}
 <section class="section"><div class="wrap">
   ${caveat(`"Professional Services" is broader than consulting. In health it is mostly doctors paid fee-for-service under the Medical Care Plan, and it includes legal, engineering and other outside services, so read the program name before reading the figure. This account gives totals by program, not individual contracts; contract awards that mention consulting are in the <a href="/search/?q=consulting">search</a>.`)}
   <div class="grid-2">

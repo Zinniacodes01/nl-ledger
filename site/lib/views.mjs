@@ -7,6 +7,7 @@ import { isFederal, nativeAmount, currencyOf, federalStatement, federalDetails, 
 export const slug = (s) =>
   String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
 
+// Plain text is also used in metadata; HTML callers escape it at the insertion.
 function amountText(it) {
   if (isFederal(it)) return nativeAmount(it.a, currencyOf(it));
   if (it.a != null) return money(it.a, { cents: Math.round(it.a * 100) % 100 !== 0 });
@@ -15,7 +16,7 @@ function amountText(it) {
 }
 
 function who(it) {
-  if (it.s && it.k && it.ds !== "sunshine") return `<a href="/supplier/${it.k}/">${esc(it.s)}</a>`;
+  if (it.s && it.k && it.ds !== "sunshine") return `<a href="/supplier/${esc(it.k)}/">${esc(it.s)}</a>`;
   return esc(it.s || it.p || (it.x?.payee_withheld ? "Payee not published" : ""));
 }
 
@@ -32,11 +33,11 @@ export function resultItem(it, flags, links) {
   ].filter(Boolean);
   return html`<li class="result">
     <span class="who">${party ? `<span class="party-label">${party}: </span>` : ""}${who(it) || esc(it.d)}</span>
-    <span class="amt">${amountText(it)}${query(it.f, flags)}<span class="amount-type">${esc(isFederal(it) ? amountBasis(it) : AMOUNT_LABEL[it.ds] || "Published value")}</span></span>
+    <span class="amt">${esc(amountText(it))}${query(it.f, flags)}<span class="amount-type">${esc(isFederal(it) ? amountBasis(it) : AMOUNT_LABEL[it.ds] || "Published value")}</span></span>
     ${isFederal(it) ? `<p class="what">${esc(federalStatement(it))} ${esc(moneyLimit(it))}</p>` : ""}
     ${it.d && (it.s || it.p) ? `<p class="what">${esc(it.d)}</p>` : ""}
     <div class="meta">${meta.join("")}</div>
-    <div class="result-actions"><a href="/item/${it.i}/">Record</a>${receipt(it.u, it.g, it.l)}</div>
+    <div class="result-actions"><a href="/item/${esc(it.i)}/">Record</a>${receipt(it.u, it.g, it.l)}</div>
   </li>`;
 }
 
@@ -168,7 +169,7 @@ export function itemPage(it, { flags, stats, links }) {
 </div></header>
 <section class="section"><div class="wrap grid-2">
   <div>
-    <p class="cover-fig record-amount">${amountText(it)}</p>
+    <p class="cover-fig record-amount">${esc(amountText(it))}</p>
     <p class="small muted amount-note">${esc(isFederal(it) ? amountBasis(it) : AMOUNT_LABEL[it.ds] || "Published value")}.${["ppa", "fed_contract", "canadabuys"].includes(it.ds) ? " This is a contract or award value, not the amount paid out." : it.ds === "fed_grant" ? " An agreement can cover several years; this is not the amount paid out." : it.ds === "sunshine" ? " From the over-$100,000 list, rounded to $100 by the publisher." : ""}</p>
     ${isFederal(it) ? `<p class="lede">${esc(federalStatement(it))}</p><p class="small">${esc(moneyLimit(it))}</p>` : it.a ? `<p class="lede">${money(perPerson(it.a, stats), { cents: true })} per person in the province. ${workTime(it.a, stats)} of work at the median full-time wage.</p>` : ""}
     ${leaders(facts).replace('class="leaders"', 'class="leaders facts"')}
@@ -177,7 +178,7 @@ export function itemPage(it, { flags, stats, links }) {
     <div class="receipt">
       <h3>Receipt</h3>
       <p>${esc(it.l || "")}</p>
-      <p><a class="btn solo" href="${esc(href)}" rel="noopener"><span>Open the source ${pdf && it.g ? `at page ${it.g}` : ""}</span> ${icon("out")}</a></p>
+      <p><a class="btn solo" href="${esc(href)}" rel="noopener"><span>Open the source ${pdf && it.g ? `at page ${esc(it.g)}` : ""}</span> ${icon("out")}</a></p>
       ${x.machine_read ? `<p class="small">Machine-read from a scanned image; compare with the page before quoting.</p>` : ""}
       ${x.note ? `<p class="small">${esc(x.note)}</p>` : ""}
       ${isFederal(it) ? html`<h3>Source location evidence</h3>
@@ -187,10 +188,10 @@ export function itemPage(it, { flags, stats, links }) {
         <ul class="prose small">${(x.scope_evidence || []).map(e => html`<li>${esc(e.field || "Evidence")}: ${esc(e.value)} ${receipt(e.source_url, null, e.locator)}</li>`)}</ul>
         <details><summary>Full source fields</summary><dl>${Object.entries(x.source_fields || {}).map(([k, v]) => html`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`)}</dl></details>
         ${x.amendment_chain_review ? html`<p class="small">${esc(x.amendment_chain_review.reason)} <a href="${esc(x.amendment_chain_review.source_url)}">Official amendment history</a>, reviewed ${esc(x.amendment_chain_review.reviewed)}.</p>` : ""}
-        ${x.amendment_history?.length ? html`<details><summary>Amendment history, counted once</summary><ul class="prose small">${x.amendment_history.map(r => html`<li>${esc(r.supplier)}: ${nativeAmount(r.amount, "CAD")}; original ${nativeAmount(r.original_value, "CAD")}; start ${esc(r.start)}; procurement ${esc(r.procurement_id)}. ${receipt(r.source_url, null, `CSV line ${r.csv_line}`)}</li>`)}</ul></details>` : ""}` : ""}
+        ${x.amendment_history?.length ? html`<details><summary>Amendment history, counted once</summary><ul class="prose small">${x.amendment_history.map(r => html`<li>${esc(r.supplier)}: ${esc(nativeAmount(r.amount, "CAD"))}; original ${esc(nativeAmount(r.original_value, "CAD"))}; start ${esc(r.start)}; procurement ${esc(r.procurement_id)}. ${receipt(r.source_url, null, `CSV line ${r.csv_line}`)}</li>`)}</ul></details>` : ""}` : ""}
       ${x.repeat_printings?.length ? html`<h3>Other printings, counted once</h3>
         <ul class="prose small">${x.repeat_printings.map((r) => html`<li>
-          <a href="${esc(r.source_url)}#page=${r.page}" rel="noopener">${esc(r.source_file.split("/").pop())}, ${esc(r.locator)}</a>:
+          <a href="${esc(r.source_url)}#page=${esc(r.page)}" rel="noopener">${esc(r.source_file.split("/").pop())}, ${esc(r.locator)}</a>:
           ${esc(r.supplier)}; ${esc(r.buyer || "buyer not printed")}; ${esc(r.description)};
           contract ${esc(r.contract_no)}; ${esc(fmtDate(r.award_date) || "date not printed")};
           ${money(r.amount, { cents: true })}; ${esc(r.term || "term not printed")}; renewal: ${esc(r.renewal || "not printed")}.
@@ -206,7 +207,7 @@ export function itemPage(it, { flags, stats, links }) {
 // The printed names a supplier page combines, each linking to its own records.
 function combinedNames(s, hash) {
   return html`<div class="combined small"><p>This page combines ${num(s.combined.length)} printed names, joined on the evidence described in the method:</p>
-  <ul>${s.combined.map((c) => html`<li><a href="/search/?s=${hash}&amp;n=${c.h}">${esc(c.t)}</a> <span>${num(c.n)} ${c.n === 1 ? "record" : "records"}</span></li>`)}</ul>
+  <ul>${s.combined.map((c) => html`<li><a href="/search/?s=${esc(hash)}&amp;n=${esc(c.h)}">${esc(c.t)}</a> <span>${num(c.n)} ${c.n === 1 ? "record" : "records"}</span></li>`)}</ul>
   <p><a href="/method/suppliers/">How names are matched</a> · <a href="https://github.com/nlledger/nl-ledger/issues/new?template=challenge-method.yml">Question this match</a></p></div>`;
 }
 
@@ -222,7 +223,7 @@ export function supplierPage(s, { flags, stats, hash, links }) {
   <p class="lede">${num(s.n)} ${s.n === 1 ? "record" : "records"} across provincial and federal sources: ${moneyWords(s.total)} in included CAD record values across all years${s.overlap ? `; ${moneyWords(s.overlap)} in federal payment and award notice values excluded from this total because these sources can overlap contracts and grants` : ""}${s.city ? `. Listed in ${esc(s.city)}` : ""}.${s.names ? ` Also printed as: ${s.names.filter((n) => n !== s.name).map(esc).join("; ")}.` : ""}</p>
   ${s.businessNumbers?.length > 1 ? html`<div class="combined small"><p>The records carry more than one business number, listed as published: ${s.businessNumbers.map(esc).join("; ")}. This page groups the organisation the publisher named; it does not verify who holds each number.</p></div>` : ""}
   ${s.related?.length ? html`<div class="combined small"><p><strong>${s.identityUnresolved ? "Identity unresolved." : "Different organisations identified by named source records."}</strong> Other pieces have the same or a closely matched published name. This page's total covers only its own records; read the other pieces before treating it as the organisation's whole record.</p>
-    <ul>${s.related.map(r => html`<li><a href="/supplier/${r.h}/">${esc(r.name)}</a>: ${num(r.n)} ${r.n === 1 ? "record" : "records"}; ${money(r.total, { cents: true })} in included record values${r.overlap ? `; ${money(r.overlap, { cents: true })} excluded because sources can overlap` : ""}.</li>`)}</ul></div>` : ""}
+    <ul>${s.related.map(r => html`<li><a href="/supplier/${esc(r.h)}/">${esc(r.name)}</a>: ${num(r.n)} ${r.n === 1 ? "record" : "records"}; ${money(r.total, { cents: true })} in included record values${r.overlap ? `; ${money(r.overlap, { cents: true })} excluded because sources can overlap` : ""}.</li>`)}</ul></div>` : ""}
   ${s.anchors?.length ? html`<p class="small">Named source evidence: ${s.anchors.map(([name, url]) => html`<a href="${esc(url)}">${esc(name)}</a>`).join("; ")}.</p>` : ""}
   ${s.combined ? combinedNames(s, hash) : ""}
   ${standing()}
@@ -233,12 +234,12 @@ export function supplierPage(s, { flags, stats, hash, links }) {
   </div>
   <p class="small muted">Awards and contract values are commitments; payments are amounts reported as paid. Sources can overlap, so even included record values are not a deduplicated spending total. <a href="/method/suppliers/">What this total includes</a>.</p>
   <p class="small">${esc(FEDERAL_RULE)} ${esc(OVERLAP_RULE)}</p>
-  ${s.breakdown?.length ? schedule({ caption: "Reported values by source, location evidence and currency", cols: [{ label: "Source and evidence" }, { label: "Records", num: true }, { label: "Native value", num: true }], rows: s.breakdown.map(g => ({ cells: [esc(DATASET_LABEL[g.source] || g.source) + `<span class="meta">${esc(g.amount_kind)}; ${esc(SCOPE_LABEL[g.scope_status] || "Provincial records")}; ${g.scope_review_state ? esc(REVIEW_LABEL[g.scope_review_state]) + "; " : ""}${esc(g.counting_basis)}; ${g.included_in_summary ? "included" : esc(g.exclusion_reason)}. Periods: ${esc(periodText(g.periods))}. ${g.missing_amounts} amounts not stated; ${g.zero_amounts} published zeros.</span>`, num(g.records), nativeAmount(g.records === g.missing_amounts ? null : g.value, g.currency)] })) }) : ""}
+  ${s.breakdown?.length ? schedule({ caption: "Reported values by source, location evidence and currency", cols: [{ label: "Source and evidence" }, { label: "Records", num: true }, { label: "Native value", num: true }], rows: s.breakdown.map(g => ({ cells: [esc(DATASET_LABEL[g.source] || g.source) + `<span class="meta">${esc(g.amount_kind)}; ${esc(SCOPE_LABEL[g.scope_status] || "Provincial records")}; ${g.scope_review_state ? esc(REVIEW_LABEL[g.scope_review_state]) + "; " : ""}${esc(g.counting_basis)}; ${g.included_in_summary ? "included" : esc(g.exclusion_reason)}. Periods: ${esc(periodText(g.periods))}. ${esc(g.missing_amounts)} amounts not stated; ${esc(g.zero_amounts)} published zeros.</span>`, num(g.records), esc(nativeAmount(g.records === g.missing_amounts ? null : g.value, g.currency))] })) }) : ""}
   <div class="grid-2 supplier-breakdown">
     <div class="supplier-schedules">${schedule({ compact: true, caption: "By source, supported CAD values only", cols: [{ label: "Source" }, { label: "Records", num: true }, { label: "Value", num: true }], rows: dsRows.map(([d, [n, a]]) => ({ cells: [esc(DATASET_LABEL[d] || d) + (["pa_pss", "pa_tp", "canadabuys"].includes(d) ? '<span class="meta">excluded from the total; can overlap contracts and grants</span>' : ""), num(n), moneyWords(a)] })) })}
       ${s.buyers?.length ? `<p class="small muted">Included values make up the headline; excluded values are shown separately and never added to it. Neither column means this body paid these amounts.</p>` + schedule({ compact: true, caption: "Public bodies named in these records", cols: [{ label: "Public body" }, { label: "Records", num: true }, { label: "Included value", num: true }, { label: "Excluded value", num: true }], rows: s.buyers.map((b) => ({ cells: [bodyLink(b.name, links), num(b.n), moneyWords(b.included), moneyWords(b.excluded)] })), foot: [{ cells: ["All public bodies", num(s.n), moneyWords(s.total), moneyWords(s.overlap)] }] }) : ""}
     </div>
-    <div>${years.length > 1 ? schedule({ compact: true, caption: "Included CAD values by original record year", cols: [{ label: "Year" }, { label: "", w: "55%" }, { label: "Value", num: true }], rows: years.map(([y, v]) => ({ cells: [y, bar(v, ymax), moneyWords(v)] })) }) : ""}
+    <div>${years.length > 1 ? schedule({ compact: true, caption: "Included CAD values by original record year", cols: [{ label: "Year" }, { label: "", w: "55%" }, { label: "Value", num: true }], rows: years.map(([y, v]) => ({ cells: [esc(y), bar(v, ymax), moneyWords(v)] })) }) : ""}
       ${flagRows.length ? html`<h3 style="margin-block:1.5rem .6rem">Patterns</h3><ul class="flaglist">${flagRows.map((x) => flagItem(x.f, { count: `${num(x.n)} ${x.n === 1 ? "record" : "records"}`, method: true }))}</ul>` : ""}
     </div>
   </div>
@@ -246,7 +247,7 @@ export function supplierPage(s, { flags, stats, hash, links }) {
 <section class="section"><div class="wrap">
   <h2 style="margin-block-end:1rem">Largest records</h2>
   <ol class="results">${s.top.map((it) => resultItem({ ...it, s: undefined, k: undefined, fy: undefined }, flags, links)).join("")}</ol>
-  ${s.n > s.top.length ? `<p style="margin-block-start:1.5rem"><a href="/search/?s=${hash}">All ${num(s.n)} records ${icon("arrow")}</a></p>` : ""}
+  ${s.n > s.top.length ? `<p style="margin-block-start:1.5rem"><a href="/search/?s=${esc(hash)}">All ${num(s.n)} records ${icon("arrow")}</a></p>` : ""}
 </div></section>
 <div class="wrap">${spotError()}</div>`;
   return { title: s.name, body };
