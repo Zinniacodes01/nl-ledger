@@ -1,0 +1,88 @@
+summary,published identity or source,before numeric total (previous CAD label),after supported CAD total,change
+body,fisheries and oceans canada,899973253.07,899579003.07,-394250.00
+body,foreign affairs trade and development canada,52924.80,0.00,-52924.80
+body,health canada,842298049.77,775198649.77,-67099400.00
+body,marine atlantic,25029116.65,0.00,-25029116.65
+body,public works and government services canada,37377961.72,36904961.72,-473000.00
+body/method,fisheries and oceans canada / Competitive - Open bidding,14178695.20,13784445.20,-394250.00
+body/method,foreign affairs trade and development canada / Competitive - Open bidding,52924.80,0.00,-52924.80
+body/method,health canada / Competitive (open bidding),322360735.35,255261335.35,-67099400.00
+body/method,marine atlantic / Competitive - Open bidding,25029116.65,0.00,-25029116.65
+body/method,public works and government services canada / Non-competitive,19657607.16,19184607.16,-473000.00
+body/source,fisheries and oceans canada / canadabuys,14536455.20,14142205.20,-394250.00
+body/source,foreign affairs trade and development canada / canadabuys,52924.80,0.00,-52924.80
+body/source,health canada / fed_contract,322729159.77,255629759.77,-67099400.00
+body/source,marine atlantic / canadabuys,25029116.65,0.00,-25029116.65
+body/source,public works and government services canada / canadabuys,37377961.72,36904961.72,-473000.00
+body/supplier,fisheries and oceans canada / farrells excavating,1885205.45,1490955.45,-394250.00
+body/supplier,foreign affairs trade and development canada / adam egan landscapes,52924.80,0.00,-52924.80
+body/supplier,health canada / 11983890 canada centre,67099400.00,0.00,-67099400.00
+body/supplier,marine atlantic / atlantic grocery distributors,16900000.00,0.00,-16900000.00
+body/supplier,marine atlantic / baine johnston properties,2775000.00,0.00,-2775000.00
+body/supplier,marine atlantic / idea factory,600000.00,0.00,-600000.00
+body/supplier,marine atlantic / port aux basques snow clearing,3333778.00,0.00,-3333778.00
+body/supplier,marine atlantic / sansom equipment,420338.65,0.00,-420338.65
+body/supplier,marine atlantic / triware technologies,1000000.00,0.00,-1000000.00
+body/supplier,public works and government services canada / kongsberg maritime canada,473000.00,0.00,-473000.00
+body/year,fisheries and oceans canada / 2022,172827326.43,172433076.43,-394250.00
+body/year,foreign affairs trade and development canada / 2024,52924.80,0.00,-52924.80
+body/year,health canada / 2020,323625214.35,256525814.35,-67099400.00
+body/year,marine atlantic / 2023,19675000.00,0.00,-19675000.00
+body/year,marine atlantic / 2024,1600000.00,0.00,-1600000.00
+body/year,marine atlantic / 2025,3754116.65,0.00,-3754116.65
+body/year,public works and government services canada / 2022,28623386.70,28150386.70,-473000.00
+home/former-combined-federal-record-values,,11045002652.20,10977903252.20,-67099400.00
+pattern,contract-growth,1169132892.32,1102033492.32,-67099400.00
+source,canadabuys,855968652.83,830019361.38,-25949291.45
+source,fed_contract,2614227060.51,2547127660.51,-67099400.00
+source,pa_pss,690028445.00,683854665.00,-6173780.00
+source/year,canadabuys / 2022,96631893.66,95764643.66,-867250.00
+source/year,canadabuys / 2023,296889868.27,277214868.27,-19675000.00
+source/year,canadabuys / 2024,198066070.13,196413145.33,-1652924.80
+source/year,canadabuys / 2025,105604424.04,101850307.39,-3754116.65
+source/year,fed_contract / 2020,341012716.47,273913316.47,-67099400.00
+source/year,pa_pss / 2023-24,178022733.00,176005865.00,-2016868.00
+source/year,pa_pss / 2024-25,126827149.00,122670237.00,-4156912.00
+supplier,11983890 canada centre / included,67099400.00,0.00,-67099400.00
+supplier,73719 newfoundland and labrador / excluded,6286216.00,0.00,-6286216.00
+supplier,adam egan landscapes / excluded,52924.80,0.00,-52924.80
+supplier,atlantic grocery distributors / excluded,50107610.00,33207610.00,-16900000.00
+supplier,baine johnston properties / excluded,2775000.00,0.00,-2775000.00
+supplier,farrells excavating / excluded,1629483.40,1235233.40,-394250.00
+supplier,fish food and allied workers / excluded,6164271.04,8250885.04,2086614.00
+supplier,fish / excluded,2086614.00,0.00,-2086614.00
+supplier,idea factory / excluded,600000.00,0.00,-600000.00
+supplier,kongsberg maritime canada / excluded,2573571.96,2100571.96,-473000.00
+supplier,never forget films / excluded,0.00,112436.00,112436.00
+supplier,port aux basques snow clearing / excluded,3359498.00,25720.00,-3333778.00
+supplier,sansom equipment / excluded,420338.65,0.00,-420338.65
+supplier,triware technologies / excluded,1000000.00,0.00,-1000000.00
+supplier/body,11983890 canada centre / health canada / included,67099400.00,0.00,-67099400.00
+supplier/body,73719 newfoundland and labrador / veterans affairs / excluded,6286216.00,0.00,-6286216.00
+supplier/body,adam egan landscapes / foreign affairs trade and development canada / excluded,52924.80,0.00,-52924.80
+supplier/body,atlantic grocery distributors / marine atlantic / excluded,16900000.00,0.00,-16900000.00
+supplier/body,baine johnston properties / marine atlantic / excluded,2775000.00,0.00,-2775000.00
+supplier/body,farrells excavating / fisheries and oceans canada / excluded,394250.00,0.00,-394250.00
+supplier/body,fish food and allied workers / fisheries and oceans / excluded,3072504.00,5159118.00,2086614.00
+supplier/body,fish / fisheries and oceans / excluded,2086614.00,0.00,-2086614.00
+supplier/body,idea factory / marine atlantic / excluded,600000.00,0.00,-600000.00
+supplier/body,kongsberg maritime canada / public works and government services canada / excluded,473000.00,0.00,-473000.00
+supplier/body,never forget films / national film board / excluded,0.00,112436.00,112436.00
+supplier/body,port aux basques snow clearing / marine atlantic / excluded,3333778.00,0.00,-3333778.00
+supplier/body,sansom equipment / marine atlantic / excluded,420338.65,0.00,-420338.65
+supplier/body,triware technologies / marine atlantic / excluded,1000000.00,0.00,-1000000.00
+supplier/source,11983890 canada centre / fed_contract,67099400.00,0.00,-67099400.00
+supplier/source,73719 newfoundland and labrador / pa_pss,6286216.00,0.00,-6286216.00
+supplier/source,adam egan landscapes / canadabuys,52924.80,0.00,-52924.80
+supplier/source,atlantic grocery distributors / canadabuys,49400000.00,32500000.00,-16900000.00
+supplier/source,baine johnston properties / canadabuys,2775000.00,0.00,-2775000.00
+supplier/source,farrells excavating / canadabuys,1629483.40,1235233.40,-394250.00
+supplier/source,fish food and allied workers / pa_pss,0.00,2086614.00,2086614.00
+supplier/source,fish / pa_pss,2086614.00,0.00,-2086614.00
+supplier/source,idea factory / canadabuys,600000.00,0.00,-600000.00
+supplier/source,kongsberg maritime canada / canadabuys,2573571.96,2100571.96,-473000.00
+supplier/source,never forget films / pa_pss,0.00,112436.00,112436.00
+supplier/source,port aux basques snow clearing / canadabuys,3359498.00,25720.00,-3333778.00
+supplier/source,sansom equipment / canadabuys,420338.65,0.00,-420338.65
+supplier/source,triware technologies / canadabuys,1000000.00,0.00,-1000000.00
+supplier/year,11983890 canada centre / 2020,67099400.00,0.00,-67099400.00

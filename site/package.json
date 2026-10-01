@@ -1,0 +1,19 @@
+{
+  "name": "nl-ledger-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "cf dev",
+    "deploy": "cf deploy"
+  },
+  "devDependencies": {
+    "cf": "^1.0.0-beta.5",
+    "esbuild": "0.28.1",
+    "wrangler": "^4.143.1"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "2.6.2",
+    "satori": "0.26.0"
+  }
+}

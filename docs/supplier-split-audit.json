@@ -1,0 +1,14 @@
+{
+  "records": 143047,
+  "original_split_pages": 97,
+  "remaining_split_pages": 17,
+  "rejoined_pages": 80,
+  "fix_moved_records": 568,
+  "fix_changed_suppliers": 256,
+  "pr_moved_records": 179,
+  "pr_changed_suppliers": 74,
+  "included": "12421913477.31",
+  "excluded": "13435646030.83",
+  "before_sha256": "0ae7035e662397225483ac6a25436d9000ae9fcd314379654107ae0bc3826063",
+  "original_movements_sha256": "f0f85da5f2b5c9063e76a8010386a19f5049a76e7d46714b21ad9f884a933971"
+}

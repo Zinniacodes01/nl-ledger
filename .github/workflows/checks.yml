@@ -1,0 +1,75 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  guardrails:
+    name: Site guardrails and syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Python scripts parse
+        run: python3 -c "import ast, pathlib; [ast.parse(p.read_text(), str(p)) for p in pathlib.Path('pipeline').glob('*.py')]"
+      - name: JavaScript modules parse
+        run: |
+          find site \( -name '*.mjs' -o -name '*.js' \) -not -path '*/node_modules/*' -not -path '*/dist/*' -print0 | xargs -0 -n1 node --check
+      - name: Mobile schedule rendering checks
+        run: node site/check-tables-unit.mjs
+      - name: Share-card privacy, metadata and cache checks
+        run: node site/check-cards.mjs
+      - name: Search checks on the sample
+        # Spelling help, the meaning list and its fallbacks, with stand-ins for Workers AI and Vectorize.
+        run: node site/check-search.mjs
+      - name: HTML security header checks
+        run: node site/check-headers.mjs
+      - name: Financial claims and coverage checks
+        run: node site/check-claims.mjs
+      - name: MCP tools and page parity
+        run: node site/check-mcp.mjs
+      - name: Federal evidence across HTML, shares, shards and MCP
+        run: node site/check-federal.mjs
+      - name: Feedback box checks
+        # The endpoint's rules (what is stored, what is refused, nothing echoed), with stand-ins for D1, mail and Turnstile.
+        run: node site/check-feedback.mjs
+      - name: Guardrails on site code
+        # The full build needs data/build/ledger.db, which only the pipeline creates, and CI does
+        # not download every source. So this scans the site code: lib/, routes/, worker.mjs and
+        # static/ (dist is absent).
+        run: ./site/check.sh
+
+  reconcile:
+    name: Reconciliation on sample sources
+    runs-on: ubuntu-latest
+    # The weekly job's base image (Dockerfile): the parsers read PDFs through its pdftotext, and
+    # Ubuntu's older pdftotext lays out the program spending report differently.
+    container: node:24-trixie-slim
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python and pdftotext
+        run: apt-get update -q && apt-get install -y -q --no-install-recommends python3 poppler-utils ca-certificates
+      - uses: astral-sh/setup-uv@v6
+      - name: Parse the sample sources and check them against their printed totals
+        # tests/fixtures holds one real file per source that prints its own totals; see
+        # pipeline/check_fixtures.py for what each check compares.
+        working-directory: pipeline
+        env:
+          UV_PYTHON_DOWNLOADS: never
+        run: uv sync --frozen --no-install-project && uv run --no-sync python check_fixtures.py
+      - name: Supplier name matching cases, and the AI server's name keys against the pipeline's
+        working-directory: pipeline
+        run: uv run --no-sync python check_matching.py
+      - name: Provincial award source pages and counting-once decisions
+        working-directory: pipeline
+        run: uv run --no-sync python check_awards.py
+      - name: Federal source evidence and amendment-chain counterexamples
+        working-directory: pipeline
+        run: uv run --no-sync python check_federal.py

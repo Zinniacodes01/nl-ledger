@@ -1,0 +1,199 @@
+{
+  "c5500509042d": {
+    "status": "national_or_multiple_or_other",
+    "statement": "The source describes national service; no NL share is reported",
+    "fields": {
+      "comments_en": "Psychologist and Mental Health Services  \n\nHealth Canada required the services of a Contractor who had an established virtual network of psycho-social information services and supports that could be made available nationally. Services had to be evidence-based, virtual, integrated, timely, and to support individuals with mental health and substance use-related needs."
+    },
+    "places": [
+      "Canada"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "63c4432f8541": {
+    "status": "national_or_multiple_or_other",
+    "statement": "The source identifies Canadian Forces Base Halifax; no NL share is reported",
+    "fields": {
+      "additional_comments_en": "Ships and boats, Canadian Forces Base Halifax"
+    },
+    "places": [
+      "CFB Halifax, Nova Scotia"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "bca16564e795": {
+    "status": "NL",
+    "statement": "The source identifies road and runway work at Goose Bay, Labrador",
+    "fields": {
+      "additional_comments_en": "Roads, highways and airport runways, Goose Bay, Labrador"
+    },
+    "places": [
+      "Goose Bay, Labrador"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "fa607549cc54": {
+    "status": "NL",
+    "statement": "The source identifies work at Riverhead in St. John’s, NL",
+    "fields": {
+      "description_en": "The Project includes geotechnical design and site preparation for the future secondary treatment system, and upgrades to the primary treatment system at the Riverhead Wastewater Treatment Facility."
+    },
+    "places": [
+      "Riverhead, St. John’s"
+    ],
+    "geography_kind": "work_or_delivery",
+    "additional_evidence": [
+      {
+        "source_url": "https://www.stjohns.ca/news/posts/wastewater-infrastructure-expansion-announced/",
+        "locator": "27 February 2026 project announcement",
+        "value": "Names Riverhead and matching federal commitment CAD 69,639,116."
+      }
+    ]
+  },
+  "13f89fc3485e": {
+    "status": "national_or_multiple_or_other",
+    "statement": "The source identifies beneficiaries in four Nunavut communities; no NL share is reported",
+    "fields": {
+      "expected_results_en": "The improved system will be implemented and utilized in four Nunavut communities; Hall Beach, Igloolik, Sanikiluaq and Cape Dorset."
+    },
+    "places": [
+      "Hall Beach",
+      "Igloolik",
+      "Sanikiluaq",
+      "Cape Dorset"
+    ],
+    "geography_kind": "beneficiary_or_jurisdiction"
+  },
+  "287d79501c86": {
+    "status": "NL",
+    "statement": "The source identifies expected benefits for the Newfoundland and Labrador offshore oil industry",
+    "fields": {
+      "expected_results_en": "The main expected results is the creation of knowledge, best practices and solutions that lead to wider adoption of technologies that reduce greenhouse gases in the Newfoundland & Labrador offshore oil industry."
+    },
+    "places": [
+      "NL offshore oil industry"
+    ],
+    "geography_kind": "beneficiary_or_jurisdiction"
+  },
+  "36d6d738b8e8": {
+    "status": "NL",
+    "statement": "The source identifies an infrastructure agreement with Newfoundland and Labrador",
+    "fields": {
+      "agreement_title_en": "Canada-Newfoundland and Labrador Integrated Bilateral Agreement for the Investing in Canada Plan"
+    },
+    "places": [
+      "Newfoundland and Labrador government"
+    ],
+    "geography_kind": "beneficiary_or_jurisdiction"
+  },
+  "7ccd49403328": {
+    "status": "NL",
+    "statement": "The source identifies core funding to the Nunatsiavut government, not subsequent spending",
+    "fields": {
+      "description_en": "Not a Project (Mandated or Core Funding)",
+      "recipient_legal_name": "NUNATSIAVUT GOVERNMENT"
+    },
+    "places": [
+      "Nunatsiavut government"
+    ],
+    "geography_kind": "beneficiary_or_jurisdiction"
+  },
+  "11e457616b87": {
+    "status": "NL",
+    "statement": "The source identifies a payment to the Newfoundland Exchequer Account, not subsequent spending",
+    "fields": {
+      "Rcpt-nm-locn_Nm-lieu-bnfcrs_eng": "Newfoundland Exchequer Account",
+      "Rcpt-class_Cat-bnfcrs_eng": "(S) Payments to the Newfoundland and Labrador Offshore Petroleum Resource Revenue Fund"
+    },
+    "places": [
+      "Newfoundland Exchequer Account"
+    ],
+    "geography_kind": "beneficiary_or_jurisdiction"
+  },
+  "b035ea02a4e3": {
+    "status": "national_or_multiple_or_other",
+    "statement": "The source names the Manitoba government as recipient; no NL share is reported",
+    "fields": {
+      "recipient_legal_name": "Government of Manitoba",
+      "recipient_city": "Winnipeg",
+      "recipient_province": "NL"
+    },
+    "places": [
+      "Manitoba government"
+    ],
+    "geography_kind": "beneficiary_or_jurisdiction"
+  },
+  "9be02dfdf480": {
+    "status": "NL",
+    "statement": "The source identifies bridge work in Gros Morne National Park, NL",
+    "fields": {
+      "awardDescription-descriptionAttribution-eng": "BIDS RECEIVED BY FAX AND EMAIL WILL BE ACCEPTED AS OFFICIAL. BIDS RECEIVED IN-PERSON OR BY COURIER WILL NOT BE ACCEPTED. The only acceptable email address for responses to bid solicitations is soumissionsami-bidsrpc@pc.gc.ca. Bids submitted by email directly to the Contracting Authority or to any email address other than soumissionsami-bidsrpc@pc.gc.ca will not be accepted.The only acceptable facsimile for responses to bid solicitations is 1-855-983-1808.The maximum email file size that Parks Canada is capable of receiving is 15 megabytes. The Bidder is responsible for any failure attributable to the transmission or receipt of the emailed bid due to file size.The Bidder should be cognisant of the size of the email as a whole, and not only the attachments. Please take into consideration that some attachments, when sent, may be resized during the email transfer. If the email size is too large, the Bidder should send the bid in multiple emails properly labeled with the solicitation number, project name, and indicate how many emails are included (ex. 1 of 2).Emails with links to bid documents will not be accepted. Bid documents must be sent as email attachments.REQUIREMENTPCA requires the services of a heavy civil contractor to construct/replace Western Brook Bridge located along Highway 430 within Gros Morne National Park, NL. Work shall include but not limited to: construction of a temporary bypass, demolition of existing structure, construction of new bridge and subsequent highway approaches.To assist with bonding and insurance requirements, this project is estimated at a value over &amp; above $5,000,001, Taxes extra.PERIOD OF CONTRACT / DELIVERY DATEThe Contractor must perform and complete the Work by June 28, 2024.SITE VISIT Not Applicable.ENQUIRIESAll enquiries of a technical and contractual nature are to be submitted to the Contracting Authority.Enquiries regarding this solicitation must be submitted in writing and should be received no later than five (5) business days prior to the date set for solicitation closing to allow sufficient time to provide a response. Enquiries received after that time may result in an answer NOT being provided.INFORMATIONNational Parks Regulations require that all work is to be performed in accordance with the ordinances, laws, rules and regulations set out in the National Park Act.Bidders that consider themselves qualified to provide this Work and intend to submit bids on this project should obtain documents from the Government Electronic Tendering Service through the Government of Canada tendering service at www.buyandsell.gc.ca/tenders. Addenda, when issued, will be available from the Government of Canada tendering service. Bidders that elect to base their bids on documents obtained from other sources do so at their own risk. Late submissions will not be considered.The Crown retains the right to negotiate with suppliers on any procurement.Documents may be submitted in either official language of Canada. Parks Canada has made every effort to provide equivalent documents in both official languages, however, if you find any discrepancies between the English and French documents, please notify the contract officer listed in this opportunity as soon as possible so that we can rectify the situation."
+    },
+    "places": [
+      "Gros Morne National Park, NL"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "09a043d96d65": {
+    "status": "NL",
+    "statement": "The award text says only NL sites were awarded, with no successful bidder for Nova Scotia",
+    "fields": {
+      "awardDescription-descriptionAttribution-eng": "Contract awarded to sites in Newfoundland &amp; Labrador only. No successful bidder for Nova Scotia. ********************************************************************************************************This solicitation is to establish contract(s) with five (5) option year periods for regularly scheduled and as-needed paper and cardboard recycling services for nine (9) Service Canada Centres in Newfoundland and one (1) Service Canada Centre in Nova Scotia. Multiple contracts could result from this solicitation to bidders who display the ability to provider service(s) to locations listed and meet the requirements listed in the solicitation.Inquiries regarding this RFP requirement are to be submitted to the contracting officer listed below:Stephanie Luedee - nc-solicitations-gd@hrsdc-rhdcc.gc.caAmendment 1 - modify the title and the contract start date to November 1, 2022"
+    },
+    "places": [
+      "Newfoundland and Labrador"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "2596630e5aac": {
+    "status": "NL",
+    "statement": "The source identifies cleanup work at Parson’s Pond in NL",
+    "fields": {
+      "title-titre-eng": "Harbour Cleanup, Parson’s Pond, NL"
+    },
+    "places": [
+      "Parson’s Pond, NL"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "246e901188f4": {
+    "status": "NL",
+    "statement": "The source identifies conversion of the North Atlantic refinery at Come By Chance, NL",
+    "fields": {
+      "description_en": "The objective of the project is to convert the North Atlantic Refinery (NARL) to a renewable diesel facility. The facility will hydrotreat renewable, sustainable feedstocks, primarily soy, to produce renewable diesel and jet fuels."
+    },
+    "places": [
+      "Come By Chance, NL"
+    ],
+    "geography_kind": "work_or_delivery",
+    "additional_evidence": [
+      {
+        "source_url": "https://natural-resources.canada.ca/energy-sources/fossil-fuels/refining-sector-canada",
+        "locator": "Refineries in Canada",
+        "value": "Locates the North Atlantic refinery at Come By Chance, NL."
+      }
+    ]
+  },
+  "352559efa91e": {
+    "status": "NL",
+    "statement": "The source identifies contaminated-site assessment work at Goose Bay, Labrador",
+    "fields": {
+      "additional_comments_en": "Services related to the assessment of potentially contaminated sites, Goose Bay, Labrador"
+    },
+    "places": [
+      "Goose Bay, Labrador"
+    ],
+    "geography_kind": "work_or_delivery"
+  },
+  "3b111bcf74a5": {
+    "status": "national_or_multiple_or_other",
+    "statement": "The source identifies work at DRDC Shirley’s Bay, Ottawa, Ontario; no NL share is reported",
+    "fields": {
+      "additional_comments_en": "Engineering consultants-Other, DRDC Shirley's Bay, Ottawa, ON"
+    },
+    "places": [
+      "DRDC Shirley’s Bay, Ottawa, Ontario"
+    ],
+    "geography_kind": "work_or_delivery"
+  }
+}

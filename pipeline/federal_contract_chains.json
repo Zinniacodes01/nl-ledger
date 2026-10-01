@@ -1,0 +1,13 @@
+[
+  {
+    "department": "hc-sc",
+    "procurement_id": "H105002096",
+    "start": "2020-04-08",
+    "original_value": 18769300,
+    "supplier_names": ["11983890 CANADA CENTRE", "SC2.0 STEPPED CARE SOLUTIONS INC."],
+    "canonical_supplier": "SC2.0 STEPPED CARE SOLUTIONS INC.",
+    "source_url": "https://search.open.canada.ca/contracts/record/hc-sc,H105002096?amendments",
+    "reviewed": "2026-09-30",
+    "reason": "One official amendment history; department, procurement, original start and original value agree across the two supplier names."
+  }
+]

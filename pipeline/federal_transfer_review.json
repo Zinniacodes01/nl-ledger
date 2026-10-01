@@ -1,0 +1,15 @@
+{
+  "reviewed": "2026-09-30",
+  "recipient_field": "Rcpt-nm-locn_Nm-lieu-bnfcrs_eng",
+  "province_field": "Prov-Terr_eng",
+  "province": "Newfoundland and Labrador",
+  "recipients": [
+    "Government of Newfoundland and Labrador",
+    "Province of Newfoundland and Labrador",
+    "Government of Newfoundland and Labrador Newfoundland",
+    "Government of Newfoundland and Labrador - Department of Health and Community Services",
+    "Province Newfoundland & Labrador",
+    "Newfoundland Exchequer Account"
+  ],
+  "statement": "The source identifies a payment to the named Newfoundland and Labrador provincial government recipient, an NL jurisdictional receipt, not subsequent spending"
+}
