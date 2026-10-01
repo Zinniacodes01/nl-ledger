@@ -117,7 +117,12 @@ def main():
     for rid in new:
         d = local[rid]
         stmt = f"INSERT INTO docs({','.join(COLS)}) VALUES ({','.join(q(d[c]) for c in COLS)})"
-        if size + len(stmt) > 900_000 and batch:
+        if len(stmt) > 90_000:
+            # D1 refuses a statement over 100 KB (SQLITE_TOOBIG); bound values do not count towards it.
+            query(f"INSERT INTO docs({','.join(COLS)}) VALUES ({','.join('?' * len(COLS))})", [d[c] for c in COLS])
+            done += 1
+            continue
+        if size + len(stmt) > 90_000 and batch:
             query(";\n".join(batch))
             done += len(batch)
             print(f"  inserted {done:,}/{len(new):,}", flush=True)
