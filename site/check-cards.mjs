@@ -22,6 +22,7 @@ check(searchCard("Jane Doe")===null && searchCard("health Jane")===null,"search 
 check(searchCard("Dépenses publiques")?.title==="Search: Dépenses publiques","accented query preserved");
 check(searchCard("snow removal")?.figure==="","search card never contains results");
 check(searchCard("health ".repeat(100))===null,"bounded query text");
+check(searchCard(" ".repeat(301)+"roads")===null,"raw query is bounded before normalization");
 check(dynamicShare(card("x".repeat(1000)),"abc","search")===FALLBACK,"unbroken oversized word falls back");
 check(dynamicShare(card("Unsupported 😀"),"abc","search")===FALLBACK,"unsupported glyph falls back instead of missing glyph");
 const c=card("Dépenses publiques", "$0.01", "Included values");
@@ -34,15 +35,30 @@ check(text.includes('og:image:width" content="1200"')&&text.includes('og:image:h
 check(text.includes('twitter:image" content="https://nlledger.ca'+meta.image+'"'),"Twitter uses the same image");
 for (const path of ["/member/jane-doe/","/minister/jane-doe/","/item/pay-record/"]) check(layout({title:"Jane Doe",path,body:""}).includes('og:image" content="https://nlledger.ca/og.png"'),"person pages use generic card");
 const store=new Map(), waits=[];globalThis.caches={default:{match:async k=>store.get(k.url)?.clone(),put:async(k,r)=>store.set(k.url,r)}};
-let calls=0,fail=false;
+let calls=0,fail=false,renderAllowed=true,charges=0;
 const name="Fisheries and Marine Institute of Memorial University", h="1234567890";
 const files={"/data/stats.json":{population:{value:500000},median_annual_wage:{value:50000}},"/data/flags.json":{flags:[]},"/data/version.json":{v:"ab",data:"cd",code:"ef"},"/data/links.json":{},[`/data/s/${parseInt(h.slice(0,4),16)%512}.json`]:{[h]:{name,total:8300000,n:2,byDs:{},byYear:{},buyers:[],flags:{},top:[]}}};
-const env={ASSETS:{fetch:async url=>{const path=new URL(typeof url==='string'?url:url.url||url).pathname;return path==='/og.png'?new Response(new Uint8Array([137,80,78,71])):new Response(JSON.stringify(files[path]||{}),{headers:{'content-type':'application/json'}});}},SHARE_RENDER:async()=>{calls++;if(fail)throw Error("intentional renderer failure");return new Uint8Array([137,80,78,71]);}};
+const env={SHARE_RENDER_LIMIT:{limit:async({key})=>{check(key==="cards","one render budget per location, across visitors and card types");charges++;return {success:renderAllowed};}},ASSETS:{fetch:async url=>{const path=new URL(typeof url==='string'?url:url.url||url).pathname;return path==='/og.png'?new Response(new Uint8Array([137,80,78,71])):new Response(JSON.stringify(files[path]||{}),{headers:{'content-type':'application/json'}});}},SHARE_RENDER:async()=>{calls++;if(fail)throw Error("intentional renderer failure");return new Uint8Array([137,80,78,71]);}};
 const ctx=(path,params={})=>({request:new Request('https://example.test'+path),env,params,waitUntil:p=>waits.push(p)});
 const first=await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q=snow%20removal'));
 check(first.headers.get('x-share-card')==='miss' && first.headers.get('cache-control').includes('immutable'),"first card rendered with immutable versioned cache");await Promise.all(waits);
 const second=await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q=snow%20removal'));
 check(second.headers.get('x-share-card')==='hit'&&calls===1,"second request reads edge cache without rendering");
+for(const q of [' snow  removal ', 'snow\tremoval', 'snow\nremoval']) {
+ const equivalent=await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q='+encodeURIComponent(q)));
+ check(equivalent.headers.get('x-share-card')==='hit'&&calls===1,'whitespace variants reuse the canonical card');
+}
+check(charges===1,'hits do not use the render budget');
+renderAllowed=false;
+check((await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q=education'))).headers.get('x-share-card')==='fallback'&&calls===1,'exhausted render budget uses the generic image');
+check((await onRequestGet(ctx('/share/dynamic/abcdef/supplier/'+h+'.png'))).headers.get('x-share-card')==='fallback'&&calls===1,'supplier misses share the same budget');
+check((await onRequestGet({...ctx('/share/dynamic/abcdef/search.png?q=health'),env:{...env,SHARE_RENDER_LIMIT:undefined}})).headers.get('x-share-card')==='fallback'&&calls===1,'missing limiter fails closed');
+renderAllowed=true;
+for(const q of ['éducation','éducation']) {
+ await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q='+encodeURIComponent(q)));await Promise.all(waits);
+}
+check(calls===2,'NFC equivalents render once');
+
 check((await onRequestGet(ctx('/share/dynamic/000/search.png?q=snow'))).headers.get('x-share-card')==='fallback',"obsolete version gets generic card, never new data under old cache key");
 check((await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q=Jane'))).headers.get('x-share-card')==='fallback',"endpoint enforces privacy even without HTML page");
 fail=true;const failed=await onRequestGet(ctx('/share/dynamic/abcdef/search.png?q=roads'));

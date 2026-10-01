@@ -28,7 +28,7 @@ import random
 import sys
 from datetime import datetime, timezone
 
-from common import CACHE, load_manifest, sha256
+from common import CACHE, cache_path, checked_cache_parts, load_manifest, sha256
 
 GZIP_SUFFIXES = {".csv", ".jsonl", ".json", ".html", ".htm", ".txt"}
 SETTINGS = ["NL_LEDGER_S3_ENDPOINT", "NL_LEDGER_S3_BUCKET", "NL_LEDGER_S3_KEY_ID", "NL_LEDGER_S3_SECRET"]
@@ -77,17 +77,18 @@ def upload() -> None:
     sent = skipped = 0
     size = 0
     for rel, entry in sorted(manifest.items()):
-        path = CACHE / rel
+        checked_cache_parts(rel)
+        path = cache_path(CACHE / rel)
         if not path.exists():
             continue
-        digest = sha256(path)
+        digest = sha256(cache_path(path))
         if entry.get("sha256") and entry["sha256"] != digest:
             sys.exit(f"archive: {rel} does not match the sha256 in manifest.json; the cache is inconsistent")
         if digest[:16] in have.get(rel, {}):
             skipped += 1
             continue
         fetched = entry.get("fetched_at") or datetime.now(timezone.utc).isoformat(timespec="seconds")
-        body = path.read_bytes()
+        body = cache_path(path).read_bytes()
         extra = {}
         key = f"{rel}/{fetched[:10]}_{digest[:16]}"
         if path.suffix.lower() in GZIP_SUFFIXES:

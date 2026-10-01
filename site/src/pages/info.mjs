@@ -64,7 +64,7 @@ function workedExample(S) {
     ["Provincial income tax on the receipt", cents(nlIncomeTax(income, t))],
   ];
   return html`<h2>Worked example at the median wage</h2>
-  <p>The same arithmetic the receipt runs, for ${money(income)} of employment income in ${t.year}. Redo it with a calculator, or check it against form NL428 (lines 27 and 29 are the CPP and EI credits).</p>
+  <p>The same arithmetic the receipt runs, for ${money(income)} of employment income in ${esc(t.year)}. Redo it with a calculator, or check it against form NL428 (lines 27 and 29 are the CPP and EI credits).</p>
   ${schedule({ compact: true, cols: [{ label: "Step" }, { label: "Amount", num: true }], rows: rows.map((r) => ({ cells: [esc(r[0]), r[1]] })) })}
   <p class="small">Without the CPP and EI credits and the enhanced CPP deduction, the same income would show ${cents(nlIncomeTax(income, { ...t, cpp: undefined, ei: undefined }))}.</p>`;
 }
@@ -99,12 +99,12 @@ export function info(D, R) {
     body: html`${pagehead({ crumbs: [["/", "Home"], [null, "Sources"]], title: "Sources and report card", lede: "Where every figure comes from, what each source covers, and how well each publisher does at publishing it." })}
 <section class="section"><div class="wrap">
   <h2 style="margin-block-end:1.5rem">Line-item sources</h2>
-  ${SOURCES.filter((s) => DATASETS.includes(s.ds)).map((s) => { const c = counts[s.ds] || {}; return html`<article id="${s.ds}" style="padding-block:1.25rem;border-block-end:1px solid var(--hair)">
+  ${SOURCES.filter((s) => DATASETS.includes(s.ds)).map((s) => { const c = counts[s.ds] || {}; return html`<article id="${esc(s.ds)}" style="padding-block:1.25rem;border-block-end:1px solid var(--hair)">
     <h3>${esc(datasetLabel(s.ds))}</h3>
     <p class="small muted" style="margin:.3rem 0 .6rem">${esc(s.publisher)} · <a href="${esc(s.url)}">${esc(s.url.replace(/^https?:\/\//, "").slice(0, 60))}</a></p>
     <p>${esc(s.what)}</p><p class="small">${esc(s.form)}</p>
     <p class="small">Licence: <a href="${esc(LICENCES[SOURCE_LICENCE[s.ds]].url)}">${esc(LICENCES[SOURCE_LICENCE[s.ds]].name)}</a>.</p>
-    <p class="small"><strong>${num(c.n || 0)} records (CAD values only; native currency and missing amounts are shown on each record)${c.a ? `, ${moneyWords(c.a)}` : ""}</strong>${c.d0 ? `, dated ${fmtDate(c.d0)} to ${fmtDate(c.d1)}` : ""}. <a href="/search/?ds=${s.ds}">Search them</a>.</p>
+    <p class="small"><strong>${num(c.n || 0)} records (CAD values only; native currency and missing amounts are shown on each record)${c.a ? `, ${moneyWords(c.a)}` : ""}</strong>${c.d0 ? `, dated ${esc(fmtDate(c.d0))} to ${esc(fmtDate(c.d1))}` : ""}. <a href="/search/?ds=${esc(s.ds)}">Search them</a>.</p>
   </article>`; })}
   <h2 style="margin-block:2.5rem 1rem">Other sources</h2>
   ${schedule({ cols: [{ label: "Source" }, { label: "Used for" }], rows: OTHER.map(([t, u, w]) => ({ cells: [`<a href="${u}">${esc(t)}</a>`, esc(w)] })) })}
@@ -139,9 +139,9 @@ export function info(D, R) {
 <section class="section"><div class="wrap prose">
   <h2>Human scale</h2><p>These are hypothetical comparisons using a named denominator, not a bill to residents, local employment or a geographic allocation. Federal records and mixed supplier summaries do not receive automatic per-person, household or wage-time figures.</p>
   <ul>
-    <li><strong>Per person:</strong> the amount divided by the province's population, ${num(D.stats.population.value)} on ${fmtDate(D.stats.population.date)} (Statistics Canada table ${D.stats.population.table}).</li>
-    <li><strong>Per household:</strong> divided by ${num(D.stats.households.value)} private households (2021 Census, table ${D.stats.households.table}).</li>
-    <li><strong>Time to earn:</strong> divided by the median full-time wage, ${money(D.stats.median_weekly_wage.value, { cents: true })} a week in ${D.stats.median_weekly_wage.year} (table ${D.stats.median_weekly_wage.table}, vector ${D.stats.median_weekly_wage.vector}) times 52, which is ${money(D.stats.median_annual_wage.value)} a year. Weeks, days and hours assume 52 working weeks of five 7.5-hour days.</li>
+    <li><strong>Per person:</strong> the amount divided by the province's population, ${num(D.stats.population.value)} on ${esc(fmtDate(D.stats.population.date))} (Statistics Canada table ${esc(D.stats.population.table)}).</li>
+    <li><strong>Per household:</strong> divided by ${num(D.stats.households.value)} private households (2021 Census, table ${esc(D.stats.households.table)}).</li>
+    <li><strong>Time to earn:</strong> divided by the median full-time wage, ${money(D.stats.median_weekly_wage.value, { cents: true })} a week in ${esc(D.stats.median_weekly_wage.year)} (table ${esc(D.stats.median_weekly_wage.table)}, vector ${esc(D.stats.median_weekly_wage.vector)}) times 52, which is ${money(D.stats.median_annual_wage.value)} a year. Weeks, days and hours assume 52 working weeks of five 7.5-hour days.</li>
   </ul>
   <h2>The personal receipt</h2><p><a href="/method/receipt/">How the receipt is worked out</a>.</p>
   <h2>Budget against actual, the deficit and net debt</h2><p><a href="/method/budget/">Which budget is set against which actual, and why the deficit comes from the Public Accounts</a>.</p>
@@ -149,7 +149,7 @@ export function info(D, R) {
   <h2>Federal amendments</h2><p><a href="/method/federal/">How amended federal contracts and grants are counted once</a>.</p>
   <h2>Supplier names</h2><p><a href="/method/suppliers/">How names printed different ways are matched to one supplier</a>.</p>
   <h2>Totals and checks</h2><p>Every total on this site is a sum of line items loaded from the sources. Where a source prints its own totals, the sum is compared with them; the results are on the <a href="/sources/#report-card">report card</a>.</p>
-  <h2>Patterns</h2><ul>${D.catalog.flags.map((f) => `<li><a href="/method/${f.id}/">${esc(f.title)}</a></li>`)}</ul>
+  <h2>Patterns</h2><ul>${D.catalog.flags.map((f) => `<li><a href="/method/${esc(f.id)}/">${esc(f.title)}</a></li>`)}</ul>
   ${methodCode([["pipeline/flags.py", "defines and counts every pattern"], ["pipeline/build.py", "builds the database the site is made from"]], { title: "how each figure is worked out", path: "/method/" })}
 </div></section>`,
   }]);
@@ -160,7 +160,7 @@ export function info(D, R) {
     body: html`${pagehead({ crumbs: [["/", "Home"], ["/method/", "Methods"], [null, "The receipt"]], title: "Method: the personal receipt", lede: "What the receipt computes, and what it leaves out." })}
 <section class="section"><div class="wrap prose">
   <ol>
-    <li>Your provincial income tax is worked out from your income with the ${S.nl_tax.year} Newfoundland and Labrador brackets (${S.nl_tax.brackets.map((b) => `${(b[2] * 100).toFixed(1)}%${b[1] ? ` up to ${money(b[1])}` : " above that"}`).join(", ")}), less the basic personal amount credit (${money(S.nl_tax.basic_personal_amount)} at ${(S.nl_tax.brackets[0][2] * 100).toFixed(1)}%). Source: ${esc(S.nl_tax.source_label)}.</li>
+    <li>Your provincial income tax is worked out from your income with the ${esc(S.nl_tax.year)} Newfoundland and Labrador brackets (${S.nl_tax.brackets.map((b) => `${(b[2] * 100).toFixed(1)}%${b[1] ? ` up to ${money(b[1])}` : " above that"}`).join(", ")}), less the basic personal amount credit (${money(S.nl_tax.basic_personal_amount)} at ${(S.nl_tax.brackets[0][2] * 100).toFixed(1)}%). Source: ${esc(S.nl_tax.source_label)}.</li>
     <li>The receipt treats your income as employment income from one job. The enhanced CPP and CPP2 contributions are deducted from it to get net income, which the brackets and the low-income reduction then use.</li>
     <li>The Newfoundland and Labrador low-income tax reduction is applied for a single person: $997, less 16% of net income over $23,928 (form NL428, 2025).</li>
     <li>Two more credits, at the same lowest rate (${(S.nl_tax.brackets[0][2] * 100).toFixed(1)}%), come from what an employee pays into the Canada Pension Plan and Employment Insurance (form NL428 lines 27 and 29): base CPP is ${(S.nl_tax.cpp.base_rate * 100).toFixed(2)}% of earnings from ${money(S.nl_tax.cpp.exemption)} to ${money(S.nl_tax.cpp.ympe)}; EI is ${(S.nl_tax.ei.rate * 100).toFixed(2)}% of earnings up to ${money(S.nl_tax.ei.max_insurable)}. Enhanced CPP is ${(S.nl_tax.cpp.enhanced_rate * 100).toFixed(0)}% of the same earnings, and CPP2 is ${(S.nl_tax.cpp.cpp2_rate * 100).toFixed(0)}% of earnings from ${money(S.nl_tax.cpp.ympe)} to ${money(S.nl_tax.cpp.yampe)}. Sources: <a href="${esc(S.nl_tax.cpp.source)}" rel="noopener">CRA, CPP rates and maximums</a>, <a href="${esc(S.nl_tax.ei.source)}" rel="noopener">CRA, EI premium rates and maximums</a>.</li>
@@ -169,7 +169,7 @@ export function info(D, R) {
     <li>"Your share" of a contract is the contract's value times your tax divided by all provincial spending that year: the fraction of everything the province spent that your tax matches.</li>
   </ol>
   ${workedExample(S)}
-  <p>Provincial spending is paid for by many revenues. Personal income tax was ${pct(S.provincial_government.personal_income_tax / S.provincial_government.revenue)} of provincial revenue in ${S.provincial_government.year} (Statistics Canada table ${S.provincial_government.table}). The receipt shows how your part would be spread, not the whole bill. Nothing you enter leaves your browser except as a web address when you press the button without JavaScript.</p>
+  <p>Provincial spending is paid for by many revenues. Personal income tax was ${pct(S.provincial_government.personal_income_tax / S.provincial_government.revenue)} of provincial revenue in ${esc(S.provincial_government.year)} (Statistics Canada table ${S.provincial_government.table}). The receipt shows how your part would be spread, not the whole bill. With JavaScript, the calculation stays in your browser. Without it, or when you open a shared receipt link, the income is sent in the web address. Worker logs omit query strings, and feedback leaves the receipt income out. The address remains in browser history and any link you share.</p>
   ${methodCode([["site/lib/receipt.mjs", "spreads a tax bill across departments and contracts"], ["site/lib/format.mjs", "the NL428 tax calculation with CPP and EI credits"], ["pipeline/stats.py", "loads the Statistics Canada figures it uses"]], { title: "the personal tax receipt", path: "/method/receipt/" })}
 </div></section>`,
   }]);
@@ -191,7 +191,7 @@ export function info(D, R) {
   <h3>How amendments are counted</h3>
   <p>Each amendment is a new row. The Treasury Board <a href="https://open.canada.ca/data/en/dataset/432527ab-7aac-45b5-81d6-7597107a7013">data dictionary</a> says the row's agreement value is "the total grant or contribution value, and not the change in agreement value". Most departments follow it, and several say so in their notes: the Atlantic Canada Opportunities Agency ("the previous value was $X", which matches the row before), Health Canada ("The total agreement value previously disclosed has been updated"), the National Research Council ("The total amended value is"), Innovation, Science and Economic Development ("value changed from X to Y"). For these the latest amendment is the agreement's value.</p>
   <p>Four departments report each amendment as the change in value instead. For these every row of the agreement is added up.</p>
-  ${schedule({ cols: [{ label: "Department" }, { label: "Evidence in its own rows", w: "44%" }, { label: "Rows added up", num: true }, { label: "Latest row only", num: true }, { label: `Paid ${Object.values(F.grants.change_reporting)[0].paid_years}`, num: true }],
+  ${schedule({ cols: [{ label: "Department" }, { label: "Evidence in its own rows", w: "44%" }, { label: "Rows added up", num: true }, { label: "Latest row only", num: true }, { label: `Paid ${esc(Object.values(F.grants.change_reporting)[0].paid_years)}`, num: true }],
     rows: Object.values(F.grants.change_reporting).map((c) => ({ cells: [esc(c.department), esc(c.evidence), moneyWords(c.summed), moneyWords(c.latest_only), moneyWords(c.paid)] })) })}
   <p>The last column is what the department paid NL recipients in four fiscal years, from the <a href="https://donnees-data.tpsgc-pwgsc.gc.ca/ba1/pt-tp/pt-tp-2025.csv">Public Accounts transfer payments</a> (payments of $100,000 or more). Indigenous Services and Crown-Indigenous Relations paid more in those four years than their latest rows add up to for every year on file, so those rows cannot be agreement totals. If Canadian Heritage and the Public Health Agency were read as reporting totals, the grants total would be ${moneyWords(["pch", "phac-aspc"].reduce((t, o) => t + F.grants.change_reporting[o].summed - F.grants.change_reporting[o].latest_only, 0))} lower.</p>
   <h3>Grouping rows into agreements</h3>
@@ -259,7 +259,7 @@ export function info(D, R) {
     <li><strong>29 September 2026. Federal grants: $8.67 billion corrected to $8.51 billion.</strong> Some grant agreements were counted twice. A department that reports each amendment as the agreement's new total sometimes printed the recipient's name in English only and sometimes as "English name|French name", and those rows were treated as two agreements. They are now one agreement, counted at its latest amendment (for example, an Association for New Canadians agreement reported twelve times). <a href="/method/federal/">Method</a>.</li>
     <li><strong>29 September 2026. Supplier pages combine names printed different ways.</strong> A supplier's page now includes records printed under other spellings of its name where the records show they are one supplier, so its total can be higher than before. <a href="/method/suppliers/">Method</a>.</li>
   </ul>
-  <p>NL Ledger was first published on ${fmtDate(D.gathered)}.</p>
+  <p>NL Ledger was first published on ${esc(fmtDate(D.gathered))}.</p>
   <h2>Known errors in the sources</h2>
   <p>Errors found in the government's own files are not corrected here; the figure is shown as published and the error is listed on the <a href="/sources/#report-card">report card</a>.</p>
   <h2>Report an error</h2>
@@ -294,13 +294,13 @@ export function info(D, R) {
   <h3>The feedback box</h3>
   <ul>
     <li><strong>What is kept.</strong> A note sent from the box at the foot of a page is stored with the kind chosen, the text, the address of the page it was sent from, the time, which of the two checks the sender passed, and an email address only when one was typed in. The same is emailed to the people who run the site.</li>
-    <li><strong>What is not kept.</strong> No network (IP) address, browser details or cookie is stored with a note. To limit one connection to ten notes a day, a one-way code made from the network address is kept in a separate list, and deleted once it is more than a day old, when the next note arrives. The address cannot be read back from the code without the site's secret key, and the list does not say which note came from it. Cloudflare, which runs the site, keeps a log of each request the site's program handles, a note or a search alike: the time, the address requested, the network address and browser details. Those logs are kept for a limited time, and the text of a note is not in them.</li>
+    <li><strong>What is not kept.</strong> No network (IP) address, browser details or cookie is stored with a note. To limit one connection to ten notes a day, a one-way code made from the network address is kept in a separate list, and deleted once it is more than a day old, when the next note arrives. The address cannot be read back from the code without the site's secret key, and the list does not say which note came from it. Cloudflare, which runs the site, keeps a log of each request the site's program handles, a note or a search alike: the time, the address requested, the network address and browser details. Worker logs omit query strings, including receipt incomes, and are kept for a limited time. The text of a note is not in them. Receipt incomes are also removed from the page address stored and emailed with feedback.</li>
     <li><strong>Who sees it.</strong> The people who run the site. Notes are held in the site's database at Cloudflare and in the mailbox they are emailed to. A note is never shown on the site. A change made because of one is listed on <a href="/asked/">What people asked for</a>, in the site's words and without names.</li>
     <li><strong>The check that a person is sending it.</strong> When someone starts a note (the first letter typed, or a kind picked), the page loads Cloudflare Turnstile, which checks the browser for signs of an automated program. It is not loaded before that, and it sets no cookie on this site. What it collects is in Cloudflare's <a href="https://www.cloudflare.com/turnstile-privacy-policy/" rel="noopener">Turnstile Privacy Addendum</a>. With JavaScript off it never loads; the site asks for one more press of a button instead.</li>
     <li><strong>How long.</strong> Notes are kept as a record of what was asked. To have a note or an email address removed, write to <a href="mailto:${SITE.contact}">${SITE.contact}</a>.</li>
   </ul>
   <h2>Status</h2>
-  <p>This is a beta. The coverage and the sources will change, and parts of it may be wrong. Mistakes that are found are listed on the <a href="/corrections/">Corrections</a> page. Data was last gathered on ${fmtDate(D.gathered)}.</p>
+  <p>This is a beta. The coverage and the sources will change, and parts of it may be wrong. Mistakes that are found are listed on the <a href="/corrections/">Corrections</a> page. Data was last gathered on ${esc(fmtDate(D.gathered))}.</p>
   <h2 id="corrections">Corrections</h2>
   <p>To ask for a correction, use the <a href="#feedback">box at the foot of any page</a> or email <a href="mailto:${SITE.corrections}?subject=Correction%20request">${SITE.corrections}</a>. If you are a person or a company named in a record, say which page and what is wrong. Send the page address, what it shows and what you believe is correct, with a document if you have one.</p>
   <p>Each record links to the government document it came from. If the record here differs from that document, the error is on this site and will be fixed and logged on the <a href="/corrections/">Corrections</a> page. If the document itself is wrong, only the publisher can change it: contact the department, agency, House of Assembly, town or city named on the record.</p>
@@ -357,7 +357,7 @@ export function info(D, R) {
   <ul class="asked">${ASKED.map((a) => html`<li>
     <h3>${esc(a.asked)}</h3>
     <span class="state ${a.state === "done" ? "" : "open"}">${ASKED_STATE[a.state]}</span>
-    <p>${esc(a.what)}${a.href ? ` <a href="${esc(a.href)}">See it</a>.` : ""} <span class="small muted">${fmtDate(a.date)}</span></p>
+    <p>${esc(a.what)}${a.href ? ` <a href="${esc(a.href)}">See it</a>.` : ""} <span class="small muted">${esc(fmtDate(a.date))}</span></p>
   </li>`)}</ul>
   <p style="margin-block-start:2rem">To add one, write it in the <a href="#feedback">box below</a>. No account is needed.</p>
 </div></section>`,
@@ -457,7 +457,7 @@ function scalePage(D, R) {
   pins.sort((a, b) => a.amount - b.amount);
   const body = html`${pagehead({ crumbs: [["/", "Home"], [null, "$1 billion comparisons"]], title: "How big is $1 billion?", lede: "Each amount below is compared independently with CAD 1 billion. These examples cover different years and kinds of money and can overlap; they are not parts of a provincial budget and must not be added." })}
 <section class="section"><div class="wrap">
-  <p class="lede">In ${fy}, provincial department actuals were ${moneyWords(R.total)}, ${(R.total / BILLION).toFixed(1)} times this reference amount. Federal record values are separate commitments, not provincial spending.</p>
+  <p class="lede">In ${esc(fy)}, provincial department actuals were ${moneyWords(R.total)}, ${(R.total / BILLION).toFixed(1)} times this reference amount. Federal record values are separate commitments, not provincial spending.</p>
   ${schedule({ cols: [{ label: "Example, amount kind and period" }, { label: "Against CAD 1 billion", w: "30%" }, { label: "Reported value", num: true }], rows: pins.map(p => ({ cells: [`<a href="${esc(p.href)}">${esc(p.label)}</a><span class="meta">${esc(p.detail)}</span>`, bar(p.amount, BILLION), money(p.amount, { cents: true })] })) })}
   <p class="small">Each bar starts at zero and uses the same CAD 1 billion scale. No remainder or combined example total is calculated. The median wage is a reference annual wage, not local wages created by a contract.</p>
 </div></section>`;

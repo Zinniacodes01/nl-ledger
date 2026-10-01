@@ -52,7 +52,7 @@ export function flagPages(D, R) {
     } else if (f.id === "repeat-sole-source") {
       const pairs = subjects.map((s) => ({ ...s, x: JSON.parse(s.detail) })).sort((a, b) => b.value - a.value);
       results = schedule({ cols: [{ label: "Public body and supplier" }, { label: "Awards", num: true }, { label: "Value", num: true }, { label: "Period" }],
-        rows: pairs.slice(0, 80).map((s) => ({ cells: [`${bodyAnchor(D, s.x.buyer)} → <a href="/supplier/${D.keyHash(s.x.supplier_key)}/">${esc(s.x.supplier)}</a>`, num(s.x.awards), moneyWords(s.value), `${fmtDate(s.x.first)} to ${fmtDate(s.x.last)}`] })) });
+        rows: pairs.slice(0, 80).map((s) => ({ cells: [`${bodyAnchor(D, s.x.buyer)} → <a href="/supplier/${D.keyHash(s.x.supplier_key)}/">${esc(s.x.supplier)}</a>`, num(s.x.awards), moneyWords(s.value), `${esc(fmtDate(s.x.first))} to ${esc(fmtDate(s.x.last))}`] })) });
     } else if (["year-end", "dominant-supplier"].includes(f.id)) {
       const rows = subjects.map((s) => ({ ...s, x: JSON.parse(s.detail) })).sort((a, b) => b.value - a.value);
       results = f.id === "year-end"
@@ -68,7 +68,7 @@ export function flagPages(D, R) {
     } else if (f.id === "split-invoices" || f.id === "possible-duplicate") {
       const groups = subjects.map((s) => ({ ...s, x: JSON.parse(s.detail) })).sort((a, b) => b.value - a.value);
       results = schedule({ cols: [{ label: f.id === "possible-duplicate" ? "Vendor and invoice" : "Supplier, buyer and date" }, { label: f.id === "possible-duplicate" ? "Times paid" : "Invoices", num: true }, { label: f.id === "possible-duplicate" ? "Each" : "Together", num: true }, { label: "Lines", num: true }],
-        rows: groups.slice(0, 100).map((s) => ({ cells: [`<a href="/supplier/${D.keyHash(s.x.supplier_key || "")}/">${esc(s.subject)}</a>${s.x.dates ? `<span class="meta">${s.x.dates.map(fmtDate).join(", ")}</span>` : ""}`, num(s.x.invoices || s.x.times), money(s.value), s.x.items.map((i, n) => `<a class="rcpt" href="/item/${i.split("-").pop()}/">${n + 1}</a>`).join(" ")] })) });
+        rows: groups.slice(0, 100).map((s) => ({ cells: [`<a href="/supplier/${D.keyHash(s.x.supplier_key || "")}/">${esc(s.subject)}</a>${s.x.dates ? `<span class="meta">${s.x.dates.map(d => esc(fmtDate(d))).join(", ")}</span>` : ""}`, num(s.x.invoices || s.x.times), money(s.value), s.x.items.map((i, n) => `<a class="rcpt" href="/item/${i.split("-").pop()}/">${n + 1}</a>`).join(" ")] })) });
       if (groups.length > 100) results += `<p class="muted">Showing the 100 largest of ${num(groups.length)}.</p>`;
     } else if (f.id === "over-allowance") {
       const rows = subjects.map((s) => ({ ...s, x: JSON.parse(s.detail) }));
@@ -95,7 +95,7 @@ export function flagPages(D, R) {
       description: desc(seo?.description || `${f.short} ${countLine(D, f)}. Each is linked to its source: a question, not a finding.`),
       body: html`${pagehead({ crumbs: [["/", "Home"], ["/flags/", "Patterns"], [null, f.title]], title: esc(f.title), lede: esc(f.short) })}
 <section class="section"><div class="wrap">
-  <div class="grid-2" style="margin-block-end:2.5rem"><div><p>${esc(f.why)}</p>${seo?.note ? `<p>${esc(seo.note)}</p>` : ""}<p><a href="/method/${f.id}/">How this is worked out, and what it cannot tell you ${icon("arrow")}</a></p></div><div>${caveat(esc(cat.caveat))}</div></div>
+  <div class="grid-2" style="margin-block-end:2.5rem"><div><p>${esc(f.why)}</p>${seo?.note ? `<p>${esc(seo.note)}</p>` : ""}<p><a href="/method/${esc(f.id)}/">How this is worked out, and what it cannot tell you ${icon("arrow")}</a></p></div><div>${caveat(esc(cat.caveat))}</div></div>
   ${results}
   ${f.data.some(d => ["fed_contract", "fed_grant", "canadabuys", "pa_pss", "pa_tp"].includes(d)) ? federalSummary(D, "id IN (SELECT item_id FROM flags WHERE flag=?)", f.id) : ""}
 </div></section>`,
@@ -113,8 +113,8 @@ export function flagPages(D, R) {
   <h2>Data used</h2><ul>${f.data.map((d) => `<li><a href="/sources/#${d}">${esc(datasetLabel(d))}</a></li>`)}</ul>
   <h2>What it cannot tell you</h2><p>${esc(f.limits)}</p>
   ${caveat(esc(cat.caveat))}
-  <p style="margin-block-start:1.5rem">This page and the calculation are generated from one definition, so they cannot drift apart. <a href="/flags/${f.id}/">See the results</a>.</p>
-  ${methodCode([["pipeline/flags.py", `defines this pattern (the entry with id "${f.id}") and counts it`]], { title: f.title, path: `/method/${f.id}/` })}
+  <p style="margin-block-start:1.5rem">This page and the calculation are generated from one definition, so they cannot drift apart. <a href="/flags/${esc(f.id)}/">See the results</a>.</p>
+  ${methodCode([["pipeline/flags.py", `defines this pattern (the entry with id "${esc(f.id)}") and counts it`]], { title: f.title, path: `/method/${esc(f.id)}/` })}
 </div></section>`,
     }]);
   }

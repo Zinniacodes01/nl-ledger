@@ -38,13 +38,13 @@ export function itemRow(D, it, { showBuyer = true, showSupplier = true, flags = 
   const meta = [];
   if (showBuyer && it.buyer) meta.push(esc(it.buyer));
   if (it.method) meta.push(esc(it.method));
-  const amt = isFederal(it) ? nativeAmount(it.amount, it.currency) : it.amount != null ? money(it.amount) : it.amount_original ? `US${money(it.amount_original)}` : "as printed";
+  const amt = isFederal(it) ? esc(nativeAmount(it.amount, it.currency)) : it.amount != null ? money(it.amount) : it.amount_original ? `US${money(it.amount_original)}` : "as printed";
   return {
     cells: [
       `${lines.join("<br>")}${meta.length ? `<span class="meta">${meta.join(" · ")}</span>` : ""}`,
       `<span class="num">${esc(fmtDate(it.date) || it.fiscal_year || "")}</span>`,
       `${amt}${query(fl, D.flagById)}${isFederal(it) ? `<span class="meta">${esc(amountBasis(it))}. ${esc(federalStatement(it))} ${esc(moneyLimit(it))}</span>` : ""}`,
-      `<a class="rcpt" href="/item/${it.id.split("-").pop()}/">detail</a> ${receipt(it.source_url, it.page, it.locator)}`,
+      `<a class="rcpt" href="/item/${esc(it.id.split("-").pop())}/">detail</a> ${receipt(it.source_url, it.page, it.locator)}`,
     ],
   };
 }
@@ -65,7 +65,7 @@ export function federalSummary(D, where, ...args) {
   if (!groups.length) return "";
   return `<p class="small">${esc(FEDERAL_RULE)}</p>` + schedule({ caption: "Federal reported values by source and location evidence",
     cols: [{ label: "Source and evidence" }, { label: "Records", num: true }, { label: "Native value", num: true }],
-    rows: groups.map(g => ({ cells: [esc(datasetLabel(g.source)) + `<span class="meta">${esc(g.amount_kind)}; ${esc(SCOPE_LABEL[g.scope_status])}; ${g.scope_review_state ? esc(REVIEW_LABEL[g.scope_review_state]) + "; " : ""}${esc(g.counting_basis)}. Periods as reported: ${esc(periodText(g.periods))}. ${g.missing_amounts} amounts not stated; ${g.zero_amounts} published zeros.</span>`, String(g.records), nativeAmount(g.records === g.missing_amounts ? null : g.value, g.currency)] })) });
+    rows: groups.map(g => ({ cells: [esc(datasetLabel(g.source)) + `<span class="meta">${esc(g.amount_kind)}; ${esc(SCOPE_LABEL[g.scope_status])}; ${g.scope_review_state ? esc(REVIEW_LABEL[g.scope_review_state]) + "; " : ""}${esc(g.counting_basis)}. Periods as reported: ${esc(periodText(g.periods))}. ${esc(g.missing_amounts)} amounts not stated; ${esc(g.zero_amounts)} published zeros.</span>`, String(g.records), esc(nativeAmount(g.records === g.missing_amounts ? null : g.value, g.currency))] })) });
 }
 
 export function caveat(text) {
@@ -74,7 +74,7 @@ export function caveat(text) {
 
 export function pagehead({ crumbs = [], title, lede, extra = "", flagged = false }) {
   const c = crumbs.length
-    ? `<p class="crumbs">${crumbs.map(([href, label]) => (href ? `<a href="${href}">${esc(label)}</a>` : esc(label))).join(" / ")}</p>`
+    ? `<p class="crumbs">${crumbs.map(([href, label]) => (href ? `<a href="${esc(href)}">${esc(label)}</a>` : esc(label))).join(" / ")}</p>`
     : "";
   return `<header class="pagehead"><div class="wrap">${c}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ""}${flagged ? standing() : ""}${extra}</div></header>`;
 }

@@ -292,6 +292,12 @@ def grants(*, check_total=True) -> None:
         assert 5.0e9 < tot < 9.0e9, f"grants total {tot:,.0f} outside the expected range"
 
 
+def currency_code(value: str) -> str:
+    """Accept a three-letter uppercase code; the unmodified field stays in source_fields."""
+    code = value.strip()
+    return code if re.fullmatch(r"[A-Z]{3}", code) else "unstated"
+
+
 def canadabuys() -> None:
     latest: dict[str, tuple[int, dict, int]] = {}
     with open(FED / "awardNoticeComplete.csv", encoding="utf-8-sig", newline="") as fh:
@@ -315,7 +321,7 @@ def canadabuys() -> None:
             "award_date": r["contractAwardDate-dateAttributionContrat"][:10],
             "publication_date": r["publicationDate-datePublication"][:10],
             "amount": (money(r["totalContractValue-valeurTotaleContrat"]) if money(r["totalContractValue-valeurTotaleContrat"]) is not None else money(r["contractAmount-montantContrat"])),
-            "currency": r["contractCurrency-contratMonnaie"].strip() or "unstated",
+            "currency": currency_code(r["contractCurrency-contratMonnaie"]),
             "province": r["supplierAddressProvince-fournisseurAdresseProvince-eng"],
             "country": r["supplierAddressCountry-fournisseurAdressePays-eng"],
             "postal_code": r["supplierAddressPostalCode-fournisseurAdresseCodePostal"],

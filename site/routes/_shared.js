@@ -1,3 +1,4 @@
+import { feedbackContext } from "../lib/privacy.mjs";
 // Shared helpers for the Worker routes.
 import { layout, setAssetVersion } from "../lib/html.mjs";
 import { SECURITY_HEADERS } from "../lib/headers.mjs";
@@ -14,8 +15,8 @@ export async function assets(ctx) {
 
 export function page(ctx, a, { title, description, body, status = 200, path, maxAge = 3600, jsonld, robots, feedback, share, sharePath }) {
   const u = new URL(ctx.request.url);
-  // `at`: a note sent from this page is filed under the address asked for, query included (a search, a receipt).
-  const htmlText = layout({ title, description, body, path: path || u.pathname, updated: a.updated, jsonld, robots, feedback, share, sharePath, shareOrigin: ctx.env.SHARE_ORIGIN || undefined, at: u.pathname + u.search });
+  // Search context keeps its words; receipt context leaves out income.
+  const htmlText = layout({ title, description, body, path: path || u.pathname, updated: a.updated, jsonld, robots, feedback, share, sharePath, shareOrigin: ctx.env.SHARE_ORIGIN || undefined, at: feedbackContext(u.pathname + u.search) });
   return new Response(htmlText, {
     status,
     headers: { ...SECURITY_HEADERS, "content-type": "text/html; charset=utf-8", "cache-control": `public, max-age=${maxAge}` },

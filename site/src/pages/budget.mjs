@@ -37,12 +37,12 @@ export function coverLedger(y, notes) {
   const deficit = a.balance.actual < 0;
   const item = (label, fig, note) => `<div><dt>${label}</dt><dd><span class="fig">${fig}</span><span class="note">${note}</span></dd></div>`;
   return html`<div class="cover-ledger">
-  <dl aria-label="Departments' spending against the budget, ${y.year}">
+  <dl aria-label="Departments' spending against the budget, ${esc(y.year)}">
     ${item("Budgeted", `${moneyWords(c.gross.budget)}${citeBudget}`, "in the spring Estimates")}
     ${item("Spent", `${moneyWords(c.gross.actual)}${citeSpent}`, "by departments")}
     ${item(c.difference < 0 ? "Under budget" : "Over budget", moneyWords(Math.abs(c.difference)), `${(Math.abs(c.share) * 100).toFixed(1)}% ${c.difference < 0 ? "less" : "more"} than budgeted`)}
   </dl>
-  <dl aria-label="How the year ended for the whole government, ${y.year}">
+  <dl aria-label="How the year ended for the whole government, ${esc(y.year)}">
     ${item(deficit ? "Deficit" : "Surplus", `${moneyWords(Math.abs(a.balance.actual))}${citeBal}`, `budget forecast: ${moneyWords(Math.abs(a.balance.budget))}${(a.balance.budget < 0) === deficit ? "" : a.balance.budget < 0 ? " deficit" : " surplus"}`)}
     ${item("Net debt", `${moneyWords(a.net_debt.actual)}${citeDebt}`, pp ? `${money(pp.value)} a person${citePP}` : `at ${march(y.year)}`)}
   </dl>
@@ -64,10 +64,10 @@ function yearPage(D, B, y, isLatest) {
   const pp = a.net_debt_per_person;
   const citePP = pp ? notes.cite({ url: pp.source.url, page: pp.source.page, label: `${docName(pp.source, fy)}, financial statement discussion and analysis: net debt per capita ${money(pp.value)}` }) : "";
 
-  const lede = `The budget for ${fy} planned ${words(c.gross.budget)} of spending by government departments${citeBudget}. They spent ${words(c.gross.actual)}${citeSpent}, ${words(c.difference)} ${overUnder(c.difference)} the plan. Across the whole government the year ended with a ${deficit ? "deficit" : "surplus"} of ${words(a.balance.actual)}${citeOps} and net debt of ${words(a.net_debt.actual)}${citeDebt}.`;
+  const lede = `The budget for ${esc(fy)} planned ${words(c.gross.budget)} of spending by government departments${citeBudget}. They spent ${words(c.gross.actual)}${citeSpent}, ${words(c.difference)} ${overUnder(c.difference)} the plan. Across the whole government the year ended with a ${deficit ? "deficit" : "surplus"} of ${words(a.balance.actual)}${citeOps} and net debt of ${words(a.net_debt.actual)}${citeDebt}.`;
 
   const published = B.years.filter((x) => x.spent_published && x.accounts.published);
-  const yearNav = html`<nav aria-label="Fiscal year"><ul class="chips">${published.map((x) => `<li><a href="${x === B.latest ? "/budget/" : `/budget/${x.year}/`}"${x === y ? ' aria-current="page"' : ""}>${x.year}</a></li>`)}</ul></nav>`;
+  const yearNav = html`<nav aria-label="Fiscal year"><ul class="chips">${published.map((x) => `<li><a href="${x === B.latest ? "/budget/" : `/budget/${esc(x.year)}/`}"${x === y ? ' aria-current="page"' : ""}>${esc(x.year)}</a></li>`)}</ul></nav>`;
 
   // The province's own cash statement: budgeted, spent, the difference.
   const need = { budget: -c.cash_balance.budget, actual: -c.cash_balance.actual }; // a requirement is printed as a negative contribution
@@ -84,7 +84,7 @@ function yearPage(D, B, y, isLatest) {
       ${cashRow(`Cash ${need.actual < 0 ? "left over" : "requirement"}<span class="meta">spending the revenue did not cover</span>`, need)}
     </tbody>
   </table></div>
-  <p class="small muted">Modified cash basis, government departments only: the basis the House of Assembly votes on. Budgeted: ${esc(DOCS[c.budget_source.doc])} ${fy}, ${rcpt(c.budget_source)}. Spent: ${esc(DOCS.report)} ${fy}, ${rcpt(c.actual_source)}.</p>`;
+  <p class="small muted">Modified cash basis, government departments only: the basis the House of Assembly votes on. Budgeted: ${esc(DOCS[c.budget_source.doc])} ${esc(fy)}, ${rcpt(c.budget_source)}. Spent: ${esc(DOCS.report)} ${esc(fy)}, ${rcpt(c.actual_source)}.</p>`;
 
   const acctRow = (label, x, cls = "") => html`<tr${cls ? ` class="${cls}"` : ""}><th scope="row">${label}</th>${cell(x.budget)}${cell(x.actual)}${cell(x.actual - x.budget)}</tr>`;
   const acctTable = html`<p class="sched-hint">Scroll sideways for more columns.</p><div class="sched-wrap"><table class="sched pin-rows stmt tight">
@@ -113,7 +113,7 @@ function yearPage(D, B, y, isLatest) {
   <p class="sched-hint">Scroll sideways for more columns.</p><div class="sched-wrap"><table class="sched pin-rows">
     <thead><tr><th scope="col">Department</th><th scope="col" class="hide-sm" style="inline-size:24%"><span class="dv-ends"><span>Under</span><span>Over</span></span></th><th scope="col" class="n hide-sm">Budgeted</th><th scope="col" class="n hide-sm">Spent</th><th scope="col" class="n">Over (under)</th><th scope="col" class="n">%</th><th scope="col" class="n hide-sm">Source</th></tr></thead>
     <tbody>${depts.map((d) => html`<tr>
-      <th scope="row">${pages.has(d.slug) ? `<a href="/department/${d.slug}/">${esc(d.name)}</a>` : esc(d.name)}<span class="meta show-sm">${words(d.budget)} budgeted, ${words(d.spent)} spent</span>${mobileSources([[d.budget_source, "Budget source"], [d.spent_source, "Actual source"]])}</th>
+      <th scope="row">${pages.has(d.slug) ? `<a href="/department/${esc(d.slug)}/">${esc(d.name)}</a>` : esc(d.name)}<span class="meta show-sm">${words(d.budget)} budgeted, ${words(d.spent)} spent</span>${mobileSources([[d.budget_source, "Budget source"], [d.spent_source, "Actual source"]])}</th>
       <td class="hide-sm">${dv(d)}</td>
       ${cell(d.budget, " hide-sm")}${cell(d.spent, " hide-sm")}${cell(d.difference)}
       <td class="n${d.share < 0 ? " neg" : ""}">${share(d.share)}</td>
@@ -124,7 +124,7 @@ function yearPage(D, B, y, isLatest) {
 
   // Year by year (on the main page only).
   const maxYear = Math.max(...B.years.map((x) => Math.max(x.cash.gross.budget || 0, x.cash.gross.actual || 0)));
-  const yearLink = (x) => (x.spent_published && x.accounts.published ? `<a href="${x === B.latest ? "/budget/" : `/budget/${x.year}/`}">${x.year}</a>` : x.year);
+  const yearLink = (x) => (x.spent_published && x.accounts.published ? `<a href="${x === B.latest ? "/budget/" : `/budget/${esc(x.year)}/`}">${esc(x.year)}</a>` : esc(x.year));
   const restated = B.years.filter((x) => x.accounts.balance.restated != null || x.accounts.net_debt.restated != null);
   const accord = B.years.find((x) => x.year === "2019-20")?.accounts.balance.source;
   const trend = !isLatest ? "" : html`
@@ -152,7 +152,7 @@ function yearPage(D, B, y, isLatest) {
       <td class="n hide-sm">${x.accounts.net_debt_per_person ? money(x.accounts.net_debt_per_person.value) : ""}</td>
       <td class="n hide-sm">${[rcpt(b.source || b.budget_source), rcpt(nd.source)].filter(Boolean).join(" · ")}</td></tr>`; })}</tbody>
   </table></div>
-  <p class="small muted">A surplus is printed plain and a deficit in parentheses.${accord ? ` The 2019-20 Public Accounts put that year's surplus down "in large part" to the Atlantic Accord (2019) (${rcpt({ ...accord, page: null })}).` : ""}${restated.length ? ` Later accounts restated some of these figures: ${restated.map((x) => `${x.year} ${[x.accounts.balance.restated != null ? `${x.accounts.balance.restated < 0 ? "deficit" : "surplus"} to ${words(x.accounts.balance.restated)} (${rcpt(x.accounts.balance.restated_source)})` : "", x.accounts.net_debt.restated != null ? `net debt to ${words(x.accounts.net_debt.restated)} (${rcpt(x.accounts.net_debt.restated_source)})` : ""].filter(Boolean).join(" and ")}`).join("; ")}. The table shows each year as first published.` : ""}</p>
+  <p class="small muted">A surplus is printed plain and a deficit in parentheses.${accord ? ` The 2019-20 Public Accounts put that year's surplus down "in large part" to the Atlantic Accord (2019) (${rcpt({ ...accord, page: null })}).` : ""}${restated.length ? ` Later accounts restated some of these figures: ${restated.map((x) => `${esc(x.year)} ${[x.accounts.balance.restated != null ? `${x.accounts.balance.restated < 0 ? "deficit" : "surplus"} to ${words(x.accounts.balance.restated)} (${rcpt(x.accounts.balance.restated_source)})` : "", x.accounts.net_debt.restated != null ? `net debt to ${words(x.accounts.net_debt.restated)} (${rcpt(x.accounts.net_debt.restated_source)})` : ""].filter(Boolean).join(" and ")}`).join("; ")}. The table shows each year as first published.` : ""}</p>
 </div></section>`;
 
   const K = B.checks;
@@ -160,7 +160,7 @@ function yearPage(D, B, y, isLatest) {
 <section class="section" id="checks"><div class="wrap grid-2">
   <div><div class="section-head"><h2>How these figures were checked</h2>
   <p>Every figure here is read by a script from the province's own documents, then added up and compared with what those documents print. <a href="/method/budget/">How the budget and the accounts line up</a>.</p></div>
-  ${K.failed.length ? html`<p class="small">Where a check does not hold, the province's documents disagree with each other:</p><ul class="prose small">${K.failed.map((f) => `<li>${esc(f.what.split(":")[0])}, ${f.year}: the Report's Original column adds to ${f.a == null ? "nothing, because it prints no detail for the department" : money(f.a)}; the Estimates say ${money(f.b)}. The Estimates' figure is used.</li>`)}</ul>` : ""}</div>
+  ${K.failed.length ? html`<p class="small">Where a check does not hold, the province's documents disagree with each other:</p><ul class="prose small">${K.failed.map((f) => `<li>${esc(f.what.split(":")[0])}, ${esc(f.year)}: the Report's Original column adds to ${f.a == null ? "nothing, because it prints no detail for the department" : money(f.a)}; the Estimates say ${money(f.b)}. The Estimates' figure is used.</li>`)}</ul>` : ""}</div>
   <div>${leaders([
     { label: "Subtotals of the Report's cash statement that recompute", value: `${K.statement} of ${K.statement_n}` },
     { label: "Years the departments add to the Report's total", value: `${K.report.ok} of ${K.report.n}` },
@@ -172,7 +172,7 @@ function yearPage(D, B, y, isLatest) {
 </div></section>`;
 
   const body = html`
-${pagehead({ crumbs: isLatest ? [["/", "Home"], [null, "Budget against actual"]] : [["/", "Home"], ["/budget/", "Budget against actual"], [null, fy]], title: `Budget against actual, ${fy}`, lede, extra: yearNav })}
+${pagehead({ crumbs: isLatest ? [["/", "Home"], [null, "Budget against actual"]] : [["/", "Home"], ["/budget/", "Budget against actual"], [null, fy]], title: `Budget against actual, ${esc(fy)}`, lede, extra: yearNav })}
 <section class="section"><div class="wrap">
   <div class="grid-2 stmts">
     <div>${cashTable}</div>
@@ -185,7 +185,7 @@ ${pagehead({ crumbs: isLatest ? [["/", "Home"], [null, "Budget against actual"]]
 </div></section>
 <section class="section" id="departments"><div class="wrap">
   <div class="section-head"><h2>By department, largest differences first</h2>
-  <p>What each department was budgeted in the spring of ${fy.slice(0, 4)}, what it spent by ${march(fy)}, and the difference.</p></div>
+  <p>What each department was budgeted in the spring of ${esc(fy.slice(0, 4))}, what it spent by ${march(fy)}, and the difference.</p></div>
   ${deptTable}
 </div></section>${trend}${checks}`;
 
@@ -227,7 +227,7 @@ function methodPage(D, B) {
   <ul>
     <li><strong>Like for like.</strong> The Report is drawn up on the same basis as the Estimates. In its own words it uses "the modified cash basis of accounting", which "is the same basis used to prepare the budgeted appropriations and revenues as per Government's Estimates presented to the House of Assembly"${report}. Its statements print the Original Estimates beside the Actuals.</li>
     <li><strong>Budgeted</strong> is the original figure: gross expenditure in the Estimates as tabled with the budget, current and capital accounts together. It is not the amended estimate, which moves during the year as money is transferred between departments.</li>
-    <li><strong>Spent</strong> is gross expenditure in the Report, before "related revenue" (federal cost-sharing and fees that a department collects against its own spending). For ${fy}: ${money(c.gross.budget)} budgeted, ${money(c.gross.actual)} spent.</li>
+    <li><strong>Spent</strong> is gross expenditure in the Report, before "related revenue" (federal cost-sharing and fees that a department collects against its own spending). For ${esc(fy)}: ${money(c.gross.budget)} budgeted, ${money(c.gross.actual)} spent.</li>
     <li><strong>By department</strong>, the budget is the department's "Total: Program Estimates" in the Estimates, and spending is its line in the Report's summary statements. Where a department in the Report is not in that year's Estimates under the same name, the budget is the Original column the Report prints for it.</li>
     <li>The Report is prepared by the Comptroller General and is not audited.</li>
   </ul>
@@ -235,10 +235,10 @@ function methodPage(D, B) {
   <h2>The deficit and net debt</h2>
   <ul>
     <li><strong>The surplus or deficit</strong> is the "annual surplus (deficit)" line of the Consolidated Statement of Operations in the Public Accounts: total revenue less total expense for the whole government. The budget figure beside it is the Original Budget column of the same statement, which the province marks unaudited.</li>
-    <li><strong>It is not spending less revenue from the cash statement.</strong> In ${fy} departments' cash spending outran their revenue by ${money(-c.cash_balance.actual)}, while the annual ${a.balance.actual < 0 ? "deficit" : "surplus"} was ${money(Math.abs(a.balance.actual))}. The cash statement covers departments only and counts construction and equipment at full price in the year they are paid for; the accounts spread those costs over the assets' lives and include the results of Crown corporations and other public bodies.</li>
+    <li><strong>It is not spending less revenue from the cash statement.</strong> In ${esc(fy)} departments' cash spending outran their revenue by ${money(-c.cash_balance.actual)}, while the annual ${a.balance.actual < 0 ? "deficit" : "surplus"} was ${money(Math.abs(a.balance.actual))}. The cash statement covers departments only and counts construction and equipment at full price in the year they are paid for; the accounts spread those costs over the assets' lives and include the results of Crown corporations and other public bodies.</li>
     <li><strong>Spending can come in under the budget in a year when the deficit is larger than forecast</strong>, or the reverse, because the two are measured differently and the deficit also depends on revenue.</li>
     <li><strong>Net debt</strong> is total liabilities less financial assets, from the Consolidated Statement of Financial Position: what the province owes (borrowing, pensions and other retirement benefits, payables) less the cash, investments and receivables it holds. Buildings and roads are not counted as financial assets.</li>
-    <li><strong>Per person.</strong> ${pp ? `The Public Accounts print net debt per capita themselves: ${money(pp.value)} for ${fy}. That figure is used as published. Dividing net debt by the population this site uses elsewhere (${num(D.stats.population.value)}, Statistics Canada, 1 July ${fy.slice(0, 4)}) gives ${money(ownPP)}; the province divides by its own population figure.` : `Net debt divided by the population (${num(D.stats.population.value)}, Statistics Canada).`}</li>
+    <li><strong>Per person.</strong> ${pp ? `The Public Accounts print net debt per capita themselves: ${money(pp.value)} for ${esc(fy)}. That figure is used as published. Dividing net debt by the population this site uses elsewhere (${num(D.stats.population.value)}, Statistics Canada, 1 July ${esc(fy.slice(0, 4))}) gives ${money(ownPP)}; the province divides by its own population figure.` : `Net debt divided by the population (${num(D.stats.population.value)}, Statistics Canada).`}</li>
     <li><strong>Restatements.</strong> Each year is shown as that year's accounts first printed it. When the following year's accounts print a different figure for the earlier year (after a change in accounting standards, for example), the restated figure is given in a note under the table.</li>
   </ul>
 
@@ -252,14 +252,14 @@ function methodPage(D, B) {
     <li>In the Public Accounts, revenue less expense equals the printed surplus or deficit, liabilities less financial assets equals net debt, and net debt is the same in two statements: ${K.accounts.ok} of ${K.accounts.n}.</li>
     <li>From Budget 2024, when the budget's own statements are published as Statements and Schedules, the Original Budget column in the Public Accounts equals them: ${K.budget.ok} of ${K.budget.n}.</li>
   </ul>
-  ${K.failed.length ? html`<p>Where a check does not hold, the province's documents disagree with each other, and the Estimates' figure is used:</p><ul>${K.failed.map((f) => `<li>${esc(f.what.split(":")[0])}, ${f.year}: the Report's Original column adds to ${f.a == null ? "nothing, because the Report prints no program detail for the department" : money(f.a)}; the Estimates as tabled say ${money(f.b)}.</li>`)}</ul>` : ""}
+  ${K.failed.length ? html`<p>Where a check does not hold, the province's documents disagree with each other, and the Estimates' figure is used:</p><ul>${K.failed.map((f) => `<li>${esc(f.what.split(":")[0])}, ${esc(f.year)}: the Report's Original column adds to ${f.a == null ? "nothing, because the Report prints no program detail for the department" : money(f.a)}; the Estimates as tabled say ${money(f.b)}.</li>`)}</ul>` : ""}
   <p>The same checks run on sample documents for every change to the code, and the results of the last full run are in <a href="https://github.com/nlledger/nl-ledger/blob/main/docs/reconciliation.md">the reconciliation record</a>.</p>
 
   <h2>What this does not show</h2>
   <ul>
     <li>Budgets for the public bodies outside the departments (the health authority, Crown corporations) line by line. The Public Accounts give their results in total.</li>
     <li>Why a department spent more or less than budgeted. The documents give the figures; the reasons are in the province's own discussion and analysis and in debate in the House.</li>
-    <li>Results for ${B.years.filter((x) => !x.spent_published).map((x) => x.year).join(" and ")}: the Report and the Public Accounts for those years are not yet published.</li>
+    <li>Results for ${B.years.filter((x) => !x.spent_published).map((x) => esc(x.year)).join(" and ")}: the Report and the Public Accounts for those years are not yet published.</li>
   </ul>
   <h2>Sources and licence</h2>
   <ul>${Object.entries(DOCS).map(([k, name]) => { const l = LICENCES[DOCUMENT_LICENCE[k]]; return `<li>${esc(name)}. Published by the Government of Newfoundland and Labrador; used under its <a href="${esc(l.url)}">copyright notice</a>.</li>`; })}</ul>

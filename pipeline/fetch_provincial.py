@@ -7,8 +7,9 @@ Link lists with their page context are saved beside the files as _index.json.
 import html as htmllib
 import json
 import re
+from urllib.parse import unquote
 
-from common import CACHE, fetch, get_text, load_manifest, save_manifest
+from common import CACHE, cache_path, cache_write_text, checked_cache_parts, fetch, get_text, load_manifest, save_manifest
 
 MIN_INDEX = "https://www.gov.nl.ca/exec/cabinet/expenseclaims/"
 FIRST_MIN_PERIOD = "dec20may21"  # 2021 onward
@@ -19,6 +20,7 @@ def strip_tags(s: str) -> str:
 
 
 def ministers(m: dict) -> None:
+    cache_path(CACHE / "ministers/_index.json")
     idx = get_text(MIN_INDEX)
     periods = re.findall(r'href="(https://www\.gov\.nl\.ca/exec/[^"]*(?:expense-claims|expenseclaims/)[^"]*)"', idx)
     periods = [p for p in dict.fromkeys(periods) if p.rstrip("/") != MIN_INDEX.rstrip("/")]
@@ -43,12 +45,12 @@ def ministers(m: dict) -> None:
             fetch(url, dest, manifest=m)
             out.append({"period_page": p, "period_title": title, "cells": cells, "url": url,
                         "file": str(dest.relative_to(CACHE))})
-    (CACHE / "ministers").mkdir(parents=True, exist_ok=True)  # a fresh cache has no folder yet
-    (CACHE / "ministers" / "_index.json").write_text(json.dumps(out, indent=1))
+    cache_write_text(CACHE / "ministers" / "_index.json", json.dumps(out, indent=1))
     print(f"ministers: {len(out)} reports over {len(keep)} periods")
 
 
 def sunshine(m: dict) -> None:
+    cache_path(CACHE / "sunshine/_links.txt")
     hub = "https://www.gov.nl.ca/exec/tbs/home/publications/compensation-disclosure/"
     page = get_text(hub)
     links = re.findall(r'href="([^"]+\.xlsx?)"', page, re.I)
@@ -63,13 +65,22 @@ def sunshine(m: dict) -> None:
     links = list(dict.fromkeys(links))
     for u in links:
         fetch(u, CACHE / "sunshine" / u.rsplit("/", 1)[1], manifest=m)
-    (CACHE / "sunshine").mkdir(parents=True, exist_ok=True)  # a fresh cache has no folder yet
-    (CACHE / "sunshine" / "_links.txt").write_text("\n".join(links))
+    cache_write_text(CACHE / "sunshine" / "_links.txt", "\n".join(links))
     print(f"sunshine: {len(links)} files")
 
 
 MHA_BASE = "https://www.assembly.nl.ca/Members/Expenses/"
 FIRST_MHA_FY = 2020  # fiscal year starting April 2020
+
+
+def mha_report_path(href: str) -> tuple[str, int]:
+    """Accept only one annual report filename under the Assembly's Reports folder."""
+    checked_cache_parts(href)
+    decoded = unquote(href)
+    match = re.fullmatch(r"Reports/Apr(\d{4})-Mar(\d{4})/([^/]+\.pdf)", decoded, re.I)
+    if not match or int(match[2]) != int(match[1]) + 1:
+        raise ValueError(f"unexpected MHA report path: {href!r}")
+    return decoded.split("/", 1)[1], int(match[1])
 
 
 def mhas(m: dict) -> None:
@@ -78,23 +89,30 @@ def mhas(m: dict) -> None:
     Half-year (April to September) reports repeat lines from the annual report of the
     same fiscal year, so only the annual reports are used.
     """
+    cache_path(CACHE / "mha" / "_index.json")
     js = get_text("https://www.assembly.nl.ca/js/members-expenses.js")
     members = re.findall(r'href="\.\./Expenses/([^"]+)">([^<]+)</a>\',\s*district:\s*\'(.*)\'\s*$', js, re.M)
     out = []
     for page, name, district in members:
         html = get_text(MHA_BASE + page)
-        for rel in dict.fromkeys(re.findall(r'href="(Reports/Apr(\d{4})-Mar\d{4}/[^"]+\.pdf)"', html)):
-            path, fy = rel
-            if int(fy) < FIRST_MHA_FY:
+        for path in dict.fromkeys(re.findall(r'href="([^"\n]+)"', html)):
+            # Other navigation links are irrelevant; all report-looking links must
+            # satisfy the annual path contract before a destination is constructed.
+            if "reports/" not in unquote(path).lower() or not unquote(path).lower().endswith(".pdf"):
+                continue
+            # Half-year reports repeat annual lines and remain deliberately skipped.
+            if re.fullmatch(r"Reports/Apr\d{4}-Sept?\d{4}/[^/]+\.pdf", path, re.I):
+                continue
+            relative, fy = mha_report_path(path)
+            if fy < FIRST_MHA_FY:
                 continue
             url = MHA_BASE + path
-            dest = CACHE / "mha" / path.split("/", 1)[1]
+            dest = cache_path(CACHE / "mha" / relative)
             fetch(url, dest, manifest=m)
             out.append({"member": htmllib.unescape(name), "district": htmllib.unescape(district.replace("\\'", "'")),
-                        "page": MHA_BASE + page, "fy_start": int(fy), "kind": "detail" if "Det" in path else "summary",
+                        "page": MHA_BASE + page, "fy_start": fy, "kind": "detail" if "Det" in path else "summary",
                         "url": url, "file": str(dest.relative_to(CACHE)), "exists": dest.exists()})
-    (CACHE / "mha").mkdir(parents=True, exist_ok=True)  # a fresh cache has no folder yet
-    (CACHE / "mha" / "_index.json").write_text(json.dumps(out, indent=1))
+    cache_write_text(CACHE / "mha" / "_index.json", json.dumps(out, indent=1))
     print(f"mha: {len(members)} members, {sum(o['exists'] for o in out)} of {len(out)} reports cached")
 
 

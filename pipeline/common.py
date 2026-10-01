@@ -10,13 +10,14 @@ import time
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import unquote
 
 import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 # NL_LEDGER_DATA points the pipeline at another data folder: check_fixtures.py parses the
 # small source files in tests/fixtures/ there, in CI, without touching data/.
-DATA = Path(os.environ["NL_LEDGER_DATA"]) if os.environ.get("NL_LEDGER_DATA") else ROOT / "data"
+DATA = Path(os.environ["NL_LEDGER_DATA"]).absolute() if os.environ.get("NL_LEDGER_DATA") else ROOT / "data"
 CACHE = DATA / "cache"
 CLEAN = DATA / "clean"
 BUILD = DATA / "build"
@@ -33,7 +34,65 @@ UA = (
     "(KHTML, like Gecko) Chrome/128.0 Safari/537.36"
 )
 
+
+def checked_cache_parts(rel: str) -> tuple[str, ...]:
+    """Reject path syntax, including encoded traversal, before constructing a cache path."""
+    parts = rel.split("/")
+    for part in parts:
+        decoded = part
+        for _ in range(8):
+            if (decoded in ("", ".", "..") or any(c in decoded for c in "/\\:")
+                    or any(ord(c) < 32 or ord(c) == 127 for c in decoded)):
+                raise ValueError(f"unsafe cache path: {rel!r}")
+            expanded = unquote(decoded)
+            if expanded == decoded:
+                break
+            decoded = expanded
+        else:
+            raise ValueError(f"excessively encoded cache path: {rel!r}")
+    return tuple(parts)
+
+
+def cache_path(path: Path, *, allow_root: bool = False) -> Path:
+    """Confine a file to CACHE before mkdir, cache lookup, download or archive read.
+
+    The configured data directory may be a trusted worktree link. CACHE itself and
+    every component below it must be real paths, including dangling symlinks.
+    """
+    path = Path(path).absolute()
+    root = CACHE.absolute()
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        raise ValueError(f"path outside download cache: {path}") from None
+    if not rel.parts:
+        if not allow_root:
+            raise ValueError("a cached file must be below the cache directory")
+    else:
+        checked_cache_parts(rel.as_posix())
+    component = root
+    for part in (None, *rel.parts):
+        if part is not None:
+            component /= part
+        if component.is_symlink():
+            raise ValueError(f"symlink in download cache path: {component}")
+    try:
+        path.resolve().relative_to(root.resolve())
+    except ValueError:
+        raise ValueError(f"resolved path outside download cache: {path}") from None
+    return path
+
+
+def cache_write_text(path: Path, text: str) -> None:
+    """Sidecar files obey the same confinement rules as downloaded sources."""
+    path = cache_path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path(path).write_text(text)
+
+
 for d in (CACHE, CLEAN, BUILD):
+    if d == CACHE:
+        cache_path(d, allow_root=True)
     d.mkdir(parents=True, exist_ok=True)
 
 _session = requests.Session()
@@ -41,13 +100,14 @@ _session.headers["User-Agent"] = UA
 
 
 def load_manifest() -> dict:
-    if MANIFEST.exists():
-        return json.loads(MANIFEST.read_text())
+    path = cache_path(MANIFEST)
+    if path.exists():
+        return json.loads(path.read_text())
     return {}
 
 
 def save_manifest(m: dict) -> None:
-    MANIFEST.write_text(json.dumps(m, indent=1, sort_keys=True))
+    cache_write_text(MANIFEST, json.dumps(m, indent=1, sort_keys=True))
 
 
 def sha256(path: Path) -> str:
@@ -60,10 +120,12 @@ def sha256(path: Path) -> str:
 
 def record_failure(url: str, dest: Path, reason: str) -> None:
     """Note a failed download for this run; guards.py decides whether it is new."""
-    failures = json.loads(FAILURES.read_text()) if FAILURES.exists() else []
+    dest = cache_path(dest)
+    path = cache_path(FAILURES)
+    failures = json.loads(path.read_text()) if path.exists() else []
     failures.append({"url": url, "file": str(dest.relative_to(CACHE)), "reason": reason,
                      "cached_copy": dest.exists() and dest.stat().st_size > 0})
-    FAILURES.write_text(json.dumps(failures, indent=1))
+    cache_write_text(path, json.dumps(failures, indent=1))
 
 
 def is_stale(rel: str, manifest: dict, max_age_days: float | None) -> bool:
@@ -83,10 +145,13 @@ def fetch(url: str, dest: Path, *, refresh: bool = False, max_age_days: float | 
 
     Files that the publisher replaces in place (the federal bulk files) pass max_age_days so a
     weekly run fetches them again; published reports never change and are fetched once."""
-    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest = cache_path(dest)
+    tmp = cache_path(dest.with_suffix(dest.suffix + ".part"))
+    cache_path(FAILURES)
     own = manifest is None
     if own:
         manifest = load_manifest()
+    dest.parent.mkdir(parents=True, exist_ok=True)
     rel = str(dest.relative_to(CACHE))
     refresh = refresh or is_stale(rel, manifest, max_age_days)
     if dest.exists() and dest.stat().st_size > 0 and not refresh:
@@ -102,7 +167,7 @@ def fetch(url: str, dest: Path, *, refresh: bool = False, max_age_days: float | 
                 record_failure(url, dest, "404 not found")
                 return None
             r.raise_for_status()
-            tmp = dest.with_suffix(dest.suffix + ".part")
+            tmp = cache_path(tmp)
             with open(tmp, "wb") as f:
                 for chunk in r.iter_content(1 << 16):
                     f.write(chunk)
@@ -113,7 +178,7 @@ def fetch(url: str, dest: Path, *, refresh: bool = False, max_age_days: float | 
                 print(f"  NOT FOUND (HTML page served for {url})")
                 record_failure(url, dest, "HTML page served instead of the file")
                 return None
-            tmp.rename(dest)
+            cache_path(tmp).rename(cache_path(dest))
             manifest[rel] = {
                 "url": url,
                 "sha256": sha256(dest),

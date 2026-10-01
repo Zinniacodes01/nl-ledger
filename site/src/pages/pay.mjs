@@ -19,14 +19,14 @@ export function pay(D, R) {
   const idx = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], [null, "Pay over $100,000"]], title: "Public sector salaries over $100,000: the sunshine list", lede: "Often called the sunshine list: every public employee paid more than $100,000 in a calendar year, salary, overtime and other pay together, as the Public Sector Compensation Transparency Act requires each employer to publish. Amounts are rounded to $100 by the publisher." })}
 <section class="section"><div class="wrap">
   <div class="figs">
-    <div><span class="big">${num(grid.size ? [...grid.values()].reduce((s, g) => s + (g[latest]?.n || 0), 0) : 0)}</span><span class="what">people on the ${latest} lists</span></div>
-    <div><span class="big">${num(otPeople)}</span><span class="what">times someone's overtime was bigger than their salary, 2022 to ${latest}; ${moneyWords(otAmt)} of overtime (<a href="/flags/overtime-over-base/">by job</a>)</span></div>
-    <div><span class="big">${moneyWords(sevAmt)}</span><span class="what">paid in severance, ${num(sevPeople)} payments, 2022 to ${latest} (<a href="/flags/severance/">by job</a>)</span></div>
+    <div><span class="big">${num(grid.size ? [...grid.values()].reduce((s, g) => s + (g[latest]?.n || 0), 0) : 0)}</span><span class="what">people on the ${esc(latest)} lists</span></div>
+    <div><span class="big">${num(otPeople)}</span><span class="what">times someone's overtime was bigger than their salary, 2022 to ${esc(latest)}; ${moneyWords(otAmt)} of overtime (<a href="/flags/overtime-over-base/">by job</a>)</span></div>
+    <div><span class="big">${moneyWords(sevAmt)}</span><span class="what">paid in severance, ${num(sevPeople)} payments, 2022 to ${esc(latest)} (<a href="/flags/severance/">by job</a>)</span></div>
   </div>
   ${caveat(`The lists count everyone over $100,000, including overtime, so a rise in names does not mean a rise in salaries. The 2022 and 2023 core government lists are much shorter than 2024 and 2025 as published. ${broken.length} files linked from the government's disclosure page could not be downloaded (they return "page not found"), including Newfoundland and Labrador Health Services for 2023; those years are missing here.`)}
 </div></section>
 <section class="section"><div class="wrap">
-  ${schedule({ cols: [{ label: "Employer" }, ...years.toReversed().map((y) => ({ label: y, num: true }))],
+  ${schedule({ cols: [{ label: "Employer" }, ...years.toReversed().map((y) => ({ label: esc(y), num: true }))],
     rows: emp.map((e) => ({ cells: [`<a href="/pay/${D.slug(e.buyer)}/">${esc(e.buyer)}</a>`, ...years.toReversed().map((y) => { const g = grid.get(e.buyer)?.[y]; return g ? `${num(g.n)}<span class="meta">${moneyWords(g.a)}</span>` : "<span class=\"muted\">not available</span>"; })] })) })}
 </div></section>`;
   const latestN = [...grid.values()].reduce((t, g) => t + (g[latest]?.n || 0), 0);
@@ -38,16 +38,16 @@ export function pay(D, R) {
   for (const e of emp) {
     const notes = new Notes();
     const { perYear, missing, failures, coverage, top, titles, src, bh } = employers.find(x => x.buyer === e.buyer);
-    const body = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/pay/", "Pay over $100,000"], [null, e.buyer]], title: esc(e.buyer), lede: `Compensation disclosure lists for ${perYear.join(", ")}. ${src.map((s) => `<a href="${esc(s.source_url)}">${s.y} list</a>`).join(" · ")}` })}
+    const body = html`${pagehead({ flagged: true, crumbs: [["/", "Home"], ["/pay/", "Pay over $100,000"], [null, e.buyer]], title: esc(e.buyer), lede: `Compensation disclosure lists for ${esc(perYear.join(", "))}. ${src.map((s) => `<a href="${esc(s.source_url)}">${esc(s.y)} list</a>`).join(" · ")}` })}
 <section class="section"><div class="wrap">
   <p>Only published compensation above $100,000 is included, not the employer's entire payroll. Amounts are rounded to $100 by the publisher. A year marked “Not available” is missing data, not zero people or zero pay.</p>
   ${coverage.length ? caveat(coverage.join(" ")) : ""}
   <div class="grid-2 pay-breakdown">
-  <div>${schedule({ compact: true, caption: "By year", cols: [{ label: "Year" }, { label: "People over $100,000", num: true }, { label: "Published pay over $100,000", num: true }], rows: years.map((y) => { const g = grid.get(e.buyer)[y]; return { cells: g ? [y, num(g.n), moneyWords(g.a)] : [y, '<span class="muted">Not available</span>', '<span class="muted">Not available</span>'] }; }) })}</div>
-  <div>${schedule({ compact: true, caption: `Most common job titles, ${perYear[perYear.length - 1]}`, cols: [{ label: "Title as published" }, { label: "People", num: true }, { label: "Average", num: true }], rows: titles.map((t) => ({ cells: [esc(t.description), num(t.n), money(t.avg)] })) })}</div>
+  <div>${schedule({ compact: true, caption: "By year", cols: [{ label: "Year" }, { label: "People over $100,000", num: true }, { label: "Published pay over $100,000", num: true }], rows: years.map((y) => { const g = grid.get(e.buyer)[y]; return { cells: g ? [esc(y), num(g.n), moneyWords(g.a)] : [esc(y), '<span class="muted">Not available</span>', '<span class="muted">Not available</span>'] }; }) })}</div>
+  <div>${schedule({ compact: true, caption: `Most common job titles, ${esc(perYear[perYear.length - 1])}`, cols: [{ label: "Title as published" }, { label: "People", num: true }, { label: "Average", num: true }], rows: titles.map((t) => ({ cells: [esc(t.description), num(t.n), money(t.avg)] })) })}</div>
 </div></div></section>
 <section class="section"><div class="wrap">
-  <h2 style="margin-block-end:1rem">Highest paid, ${perYear[perYear.length - 1]}</h2>
+  <h2 style="margin-block-end:1rem">Highest paid, ${esc(perYear[perYear.length - 1])}</h2>
   ${schedule({ cols: [{ label: "Name as published" }, { label: "Base", num: true }, { label: "Overtime", num: true }, { label: "Other", num: true }, { label: "Total", num: true }, { label: "Row", num: true }],
     rows: top.map((p) => {
       const x = JSON.parse(p.extra || "{}");

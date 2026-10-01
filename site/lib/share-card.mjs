@@ -82,9 +82,15 @@ export function supplierCard(s) {
 }
 // A free-text query may itself be a person's name. Only reviewed spending vocabulary is pictured.
 const SEARCH_WORDS = new Set("snow removal roads road ferry ferries hospital hospitals health education school schools contracts contract grants grant spending budget salaries salary overtime severance procurement sole source emergency awards award payments payment construction maintenance equipment services public provincial federal municipal water sewage transport transportation infrastructure dépenses publiques santé éducation contrats subventions déneigement routes travaux entretien".split(" "));
+export function canonicalQuery(query) {
+  const raw = String(query ?? "");
+  if (raw.length > 300) return null;
+  const q = raw.normalize("NFC").replace(/\s+/g, " ").trim();
+  return q.length <= 300 ? q : null;
+}
 export function searchCard(query) {
-  const q = String(query || "").normalize("NFC").replace(/\s+/g, " ").trim();
-  if (q.length > 300) return null;
+  const q = canonicalQuery(query);
+  if (q === null) return null;
   if (q && !q.toLowerCase().split(" ").every(w => SEARCH_WORDS.has(w))) return null;
   return card(q ? `Search: ${q}` : "Search public spending", "", "The words searched · no results pictured");
 }

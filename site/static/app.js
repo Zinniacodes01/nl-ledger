@@ -359,7 +359,7 @@
     const note = form.elements.note;
     const at = form.elements.page;
     // File the note under the address in the address bar: a search keeps its words.
-    if (!location.pathname.startsWith("/feedback")) at.value = location.pathname + location.search;
+    if (!location.pathname.startsWith("/feedback")) at.value = location.pathname + (/^\/receipt(?:\/|$)/.test(location.pathname) ? "" : location.search);
     const here = at.value;
 
     // Characters left, once the limit is near.

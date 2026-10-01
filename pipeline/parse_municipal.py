@@ -15,9 +15,10 @@ import hashlib
 import re
 import subprocess
 from collections import Counter
+from glob import escape
 from pathlib import Path
 
-from common import CACHE, CLEAN, DISABLED, load_manifest, money, norm_space, pdf_pages
+from common import CACHE, cache_path, cache_write_text, CLEAN, DISABLED, load_manifest, money, norm_space, pdf_pages
 
 PLINE = re.compile(
     r"^\s*(\S+)\s+(\d{1,2}/\d{1,2}/\d{4})\s+(.+?)\s{2,}(\S+(?: \S+)?)\s{2,}(.+?)\s{2,}(-?[\d,]+\.\d{2})\s*$"
@@ -85,12 +86,19 @@ def paradise(manifest):
 
 
 def ocr_page(pdf: Path, page: int, workdir: Path) -> str:
-    png = workdir / f"{pdf.stem}-p{page}"
+    pdf = cache_path(pdf)
+    workdir = cache_path(workdir)
+    png = cache_path(workdir / f"{pdf.stem}-p{page}")
+    images = f"{escape(png.name)}*.png"
+    # pdftoppm chooses the page-number padding, so check every possible existing
+    # output before giving it the prefix (including dangling image symlinks).
+    for image in workdir.glob(images):
+        cache_path(image)
     subprocess.run(["pdftoppm", "-r", "300", "-gray", "-f", str(page), "-l", str(page), "-png", str(pdf), str(png)],
                    check=True, capture_output=True)
-    img = next(workdir.glob(f"{png.name}*.png"))
+    img = cache_path(next(workdir.glob(images)))
     txt = subprocess.run(["tesseract", str(img), "-", "--psm", "6"], capture_output=True, text=True).stdout
-    img.unlink()
+    cache_path(img).unlink()
     return txt
 
 
@@ -99,18 +107,19 @@ SJ_LINE = re.compile(r"^(.*?)\s+\$?\s?(-?[\d,]{1,12}\.\d{2})\s*$")
 
 def stjohns(manifest, pages_per_file: int = 12):
     """OCR the first pages of the latest yearly voucher file."""
-    work = CACHE / "stjohns" / "_ocr"
+    source = cache_path(CACHE / "stjohns")
+    work = cache_path(source / "_ocr")
+    files = [cache_path(f) for f in sorted(source.glob("weekly-payment-vouchers-january-14-september-2-2026.pdf"))]
     work.mkdir(exist_ok=True)
-    files = sorted((CACHE / "stjohns").glob("weekly-payment-vouchers-january-14-september-2-2026.pdf"))
     out = []
     for f in files:
         rel = f"stjohns/{f.name}"
         weeks = ""
         for page in range(1, pages_per_file + 1):
-            cache = work / f"{f.stem}-p{page}.txt"
+            cache = cache_path(work / f"{f.stem}-p{page}.txt")
             if not cache.exists():
-                cache.write_text(ocr_page(f, page, work))
-            text = cache.read_text()
+                cache_write_text(cache, ocr_page(f, page, work))
+            text = cache_path(cache).read_text()
             if "MEMORANDUM" in text or "Weekly Payment Vouchers" in text:
                 m = re.search(r"Weeks? Ending (.+?\d{4})", text)
                 weeks = norm_space(m[1]) if m else weeks

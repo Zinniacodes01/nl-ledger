@@ -245,5 +245,49 @@ const check = (ok, what) => {
   check(!/evil/.test(await get("/feedback/sent/?from=//evil.example/")) && !/evil/.test(await get("/feedback/sent/?from=https://evil.example/")) && !/evil/.test(await get("/feedback/sent/?from=/%5Cevil.example/x")), "and never to another site, by slash or backslash");
 }
 
+// ---- receipt context never stores or emails an income
+{
+  sql.exec("DELETE FROM feedback; DELETE FROM feedback_seen");
+  const pages = ["/receipt/?income=55001", "/receipt?income=55002&income=55003", "/receipt/sub/?%69ncome=55004", "/%72eceipt/?income=55005"];
+  for (const page of pages) {
+    await post({note: "dummy privacy check",page,"cf-turnstile-response":"good"},JSON_);
+    check(!/5500[1-5]|income/i.test(rows().at(-1).page),"receipt page context drops income before storage");
+    check(!/5500[1-5]|income/i.test(mails.at(-1).text+mails.at(-1).subject),"receipt page context drops income before mail");
+  }
+  await post({note:"dummy referrer check","cf-turnstile-response":"good"},{...JSON_,referer:"https://nlledger.ca/receipt/?income=55006"});
+  check(!/55006|income/.test(rows().at(-1).page),"receipt referer fallback drops income");
+}
+
+// ---- simultaneous requests cannot take the last slot twice
+for (const mode of ["total", "confirm"]) {
+  sql.exec("DELETE FROM feedback; DELETE FROM feedback_seen");
+  const fill = sql.prepare("INSERT INTO feedback (created, note, checked, nonce) VALUES (?, 'dummy', ?, ?)");
+  const cap = mode === "total" ? 300 : 60;
+  for (let i = 0; i < cap - 1; i++) fill.run(new Date().toISOString(), mode === "confirm" ? "confirm" : "turnstile", `boundary-${i}`);
+  const fields = [];
+  for (let i = 0; i < 2; i++) {
+    const f = {note: `dummy concurrent ${i}`, page: "/flags/"};
+    if (mode === "confirm") {
+      const h = await (await post(f)).text();
+      f.confirm = h.match(/name="confirm" value="([^"]+)"/)[1];
+    } else f["cf-turnstile-response"] = "good";
+    fields.push(f);
+  }
+  const old = Date.now;
+  const beforeMail = mails.length;
+  try {
+    Date.now = () => old() + 5000;
+    const responses = await Promise.all(fields.map((f,i) => post(f,{...JSON_, "cf-connecting-ip": `198.51.100.${100+i}`})));
+    await Promise.all(pending.splice(0));
+    check(responses.map(r=>r.status).sort().join() === "200,503" && rows().length === cap, `concurrent distinct addresses respect the ${mode} cap`);
+    check(mails.length === beforeMail + 1, `only one ${mode} boundary note is emailed`);
+    if(mode === "confirm") {
+      const accepted = fields[responses.findIndex(r=>r.status===200)];
+      const replay = await post(accepted,JSON_);
+      check(replay.status===200&&rows().length===cap&&mails.length===beforeMail+1,"nonce replay at full capacity remains successful without another mail");
+    }
+  } finally { Date.now = old; }
+}
+
 console.log(failed ? `${failed} FAILED` : "feedback checks: pass");
 process.exit(failed ? 1 : 0);

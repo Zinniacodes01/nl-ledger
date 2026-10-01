@@ -34,9 +34,9 @@ export function priorities(D, R) {
   const roads = find(/^Transportation/);
   const cmp = [
     { label: `Interest on the province's borrowing${citeInt}`, value: moneyWords(interest.v), v: interest.v },
-    { label: `<a href="/department/${health.slug}/">${esc(health.name)}</a>`, value: moneyWords(health.gross), v: health.gross },
-    { label: `<a href="/department/${edu.slug}/">${esc(edu.name)}</a>`, value: moneyWords(edu.gross), v: edu.gross },
-    { label: `<a href="/department/${roads.slug}/">${esc(roads.name)}</a> (roads, ferries, buildings)`, value: moneyWords(roads.gross), v: roads.gross },
+    { label: `<a href="/department/${esc(health.slug)}/">${esc(health.name)}</a>`, value: moneyWords(health.gross), v: health.gross },
+    { label: `<a href="/department/${esc(edu.slug)}/">${esc(edu.name)}</a>`, value: moneyWords(edu.gross), v: edu.gross },
+    { label: `<a href="/department/${esc(roads.slug)}/">${esc(roads.name)}</a> (roads, ferries, buildings)`, value: moneyWords(roads.gross), v: roads.gross },
   ];
 
   // Professional services by program
@@ -55,9 +55,9 @@ export function priorities(D, R) {
   const citeMtp = notes.cite({ url: "https://donnees-data.tpsgc-pwgsc.gc.ca/ba1/ppt-mtp/ppt-mtp-2025.csv", label: "Public Accounts of Canada 2025, Volume III, major transfers to other levels of government by province, Newfoundland and Labrador, 2024-25 ($ millions as published)" });
 
   const body = html`
-${pagehead({ crumbs: [["/", "Home"], [null, "Priorities"]], title: "Priorities", lede: `What the province spent in ${fy}, department by department, against what the budget said. ${moneyWords(R.total)} in all${citeTot}.` })}
+${pagehead({ crumbs: [["/", "Home"], [null, "Priorities"]], title: "Priorities", lede: `What the province spent in ${esc(fy)}, department by department, against what the budget said. ${moneyWords(R.total)} in all${citeTot}.` })}
 <section class="section"><div class="wrap">
-  <div class="section-head"><h2>Spent against budget, ${fy}</h2>
+  <div class="section-head"><h2>Spent against budget, ${esc(fy)}</h2>
   <p>The budget's original estimate is what the House of Assembly was told in the spring. Departments can get more during the year; the amended figures are on each department's page.</p></div>
   <ul class="legend"><li><span class="sw"></span>Spent (actual)</li><li><span class="sw ghost"></span>Original estimate</li></ul>
   <p class="sched-hint">Scroll sideways for more columns.</p><div class="sched-wrap"><table class="sched pin-rows">
@@ -79,8 +79,8 @@ ${pagehead({ crumbs: [["/", "Home"], [null, "Priorities"]], title: "Priorities",
   <div><div class="section-head"><h2>Interest against health, schools and roads</h2>
   <p>Interest on the province's borrowing is paid out of Consolidated Fund Services.</p></div>
   ${leaders(cmp.map((c) => ({ label: c.label, value: c.value })))}
-  <p class="small muted" style="margin-block-start:1rem">The interest figure is the gross spending on programs 1.1.01 to 1.1.04 in the report, before any interest the province itself earns. Statistics Canada, measuring differently, puts provincial interest on debt in ${S.provincial_government.year} at ${moneyWords(S.provincial_government.interest_on_debt)}${citeSC}.</p></div>
-  <div><h3 style="margin-block-end:1rem">Every dollar spent in ${fy}</h3>
+  <p class="small muted" style="margin-block-start:1rem">The interest figure is the gross spending on programs 1.1.01 to 1.1.04 in the report, before any interest the province itself earns. Statistics Canada, measuring differently, puts provincial interest on debt in ${esc(S.provincial_government.year)} at ${moneyWords(S.provincial_government.interest_on_debt)}${citeSC}.</p></div>
+  <div><h3 style="margin-block-end:1rem">Every dollar spent in ${esc(fy)}</h3>
   <div class="stack" role="img" aria-label="Share of spending: interest ${pct(interest.v / R.total)}, health ${pct(health.gross / R.total)}, education ${pct(edu.gross / R.total)}, transportation ${pct(roads.gross / R.total)}">
     <span style="flex:${interest.v};background:var(--red)"></span><span style="flex:${health.gross};background:var(--bar)"></span><span style="flex:${edu.gross};background:var(--lv-municipal)"></span><span style="flex:${roads.gross};background:var(--graphite)"></span><span style="flex:${R.total - interest.v - health.gross - edu.gross - roads.gross};background:var(--bar-ghost)"></span></div>
   <ul class="legend"><li><span class="sw" style="background:var(--red)"></span>Interest ${pct(interest.v / R.total)}</li><li><span class="sw"></span>Health ${pct(health.gross / R.total)}</li><li><span class="sw lv-municipal"></span>Education ${pct(edu.gross / R.total)}</li><li><span class="sw" style="background:var(--graphite)"></span>Transportation ${pct(roads.gross / R.total)}</li><li><span class="sw ghost"></span>Everything else</li></ul>
@@ -88,7 +88,7 @@ ${pagehead({ crumbs: [["/", "Home"], [null, "Priorities"]], title: "Priorities",
 </div></section>
 
 <section class="section"><div class="wrap">
-  <div class="section-head"><h2>Professional services by program, ${fy}</h2>
+  <div class="section-head"><h2>Professional services by program, ${esc(fy)}</h2>
   <p>"Professional services" is the account governments use for outside expertise such as consultants. In health it is mostly doctors paid fee-for-service under the Medical Care Plan, so read the program name before reading the figure. Total across government: ${moneyWords(profTotal)}. <a href="/consulting/">Consultants and professional services, by year and department</a>.</p></div>
   ${schedule({
     cols: [{ label: "Program" }, { label: "Department" }, { label: "Professional services", num: true }, { label: "Source", num: true }],
@@ -99,7 +99,7 @@ ${pagehead({ crumbs: [["/", "Home"], [null, "Priorities"]], title: "Priorities",
 <section class="section"><div class="wrap">
   <div class="section-head"><h2>Year over year</h2><p>Gross spending by department as each year's report printed it. Departments were renamed and reorganised over these years; a blank means the department did not exist under that name.</p></div>
   <p class="sched-hint">Scroll sideways for more columns.</p><div class="sched-wrap"><table class="sched pin-rows compact">
-    <thead><tr><th scope="col">Department</th>${years.map((y) => `<th scope="col" class="n">${y}</th>`)}</tr></thead>
+    <thead><tr><th scope="col">Department</th>${years.map((y) => `<th scope="col" class="n">${esc(y)}</th>`)}</tr></thead>
     <tbody>${yoy.map((r) => html`<tr><th scope="row">${esc(r.name)}</th>${r.vals.map((v) => `<td class="n">${v ? moneyWords(v) : ""}</td>`)}</tr>`)}</tbody>
     <tfoot><tr class="total"><th scope="row">All departments</th>${years.map((y) => `<td class="n">${moneyWords(D.deptYear[y].reduce((s, d) => s + d.gross, 0))}</td>`)}</tr></tfoot>
   </table></div>
@@ -159,35 +159,35 @@ export function departments(D, R) {
     const tmax = Math.max(...trend.map((t) => t.v || 0), 1);
 
     const figs = sum ? html`<div class="figs">
-      <div><span class="big">${moneyWords(sum.gross)}</span><span class="what">spent by the province in ${latest}${cite}</span></div>
+      <div><span class="big">${moneyWords(sum.gross)}</span><span class="what">spent by the province in ${esc(latest)}${cite}</span></div>
       <div><span class="big">${money(perPerson(sum.gross, S))}</span><span class="what">of provincial spending for every person in the province</span></div>
       <div><span class="big">${workTime(sum.gross, S)}</span><span class="what">of work at the median full-time wage to earn what the province spent</span></div>
     </div>` : "";
 
     const progTable = progs.length ? schedule({
-      caption: `Programs, ${latest}`,
+      caption: `Programs, ${esc(latest)}`,
       id: "programs",
       cols: [{ label: "Program" }, { label: "Spent", num: true }, { label: "Amended", num: true }, { label: "Original estimate", num: true }, { label: "Source", num: true }],
-      rows: progs.map((p) => ({ cells: [`${esc(p.program)}<span class="meta">${p.program_code} · ${p.account === "CAPITAL" ? "capital" : "current"}</span>`, money(p.c1), money(p.c2), money(p.c3), receipt(p.source_url, p.page)] })),
+      rows: progs.map((p) => ({ cells: [`${esc(p.program)}<span class="meta">${esc(p.program_code)} · ${p.account === "CAPITAL" ? "capital" : "current"}</span>`, money(p.c1), money(p.c2), money(p.c3), receipt(p.source_url, p.page)] })),
       foot: [{ cells: ["Gross spending", money(progs.reduce((s, p) => s + p.c1, 0)), money(progs.reduce((s, p) => s + p.c2, 0)), money(progs.reduce((s, p) => s + p.c3, 0)), ""] }],
-    }) : `<p>The ${latest || ""} report prints no program detail for this department.</p>`;
+    }) : `<p>The ${esc(latest || "")} report prints no program detail for this department.</p>`;
 
     const estTable = estProgs.length ? schedule({
-      caption: `Budget estimates, ${estYear}`,
-      cols: [{ label: "Program" }, { label: `Estimate ${estYear}`, num: true }, { label: "Revised, year before", num: true }, { label: "Budget, year before", num: true }, { label: "Source", num: true }],
-      rows: estProgs.map((p) => ({ cells: [`${esc(p.program)}<span class="meta">${p.program_code}</span>`, money(p.c1), money(p.c2), money(p.c3), receipt(p.source_url, p.page)] })),
+      caption: `Budget estimates, ${esc(estYear)}`,
+      cols: [{ label: "Program" }, { label: `Estimate ${esc(estYear)}`, num: true }, { label: "Revised, year before", num: true }, { label: "Budget, year before", num: true }, { label: "Source", num: true }],
+      rows: estProgs.map((p) => ({ cells: [`${esc(p.program)}<span class="meta">${esc(p.program_code)}</span>`, money(p.c1), money(p.c2), money(p.c3), receipt(p.source_url, p.page)] })),
       foot: [{ cells: ["Gross", money(estProgs.reduce((s, p) => s + p.c1, 0)), money(estProgs.reduce((s, p) => s + p.c2, 0)), money(estProgs.reduce((s, p) => s + p.c3, 0)), ""] }],
     }) : "";
 
     const body = html`
-${pagehead({ crumbs: [["/", "Home"], ["/priorities/", "Priorities"], [null, dep.name]], title: esc(dep.name), lede: dep.years.length ? `Reported under this name in ${dep.years.join(", ")}${dep.est ? ` and in the ${estYear} estimates` : ""}.` : `Appears in the ${estYear} budget estimates.` })}
+${pagehead({ crumbs: [["/", "Home"], ["/priorities/", "Priorities"], [null, dep.name]], title: esc(dep.name), lede: dep.years.length ? `Reported under this name in ${esc(dep.years.join(", "))}${dep.est ? ` and in the ${esc(estYear)} estimates` : ""}.` : `Appears in the ${esc(estYear)} budget estimates.` })}
 <section class="section"><div class="wrap">
   ${figs}
-  ${trend.length > 1 ? html`<h3 style="margin-block-end:.8rem">Spending by year</h3>${schedule({ compact: true, cols: [{ label: "Fiscal year" }, { label: "", w: "50%" }, { label: "Spent", num: true }], rows: trend.map((t) => ({ cells: [t.y, bar(t.v || 0, tmax), t.v ? moneyWords(t.v) : ""] })) })}` : ""}
+  ${trend.length > 1 ? html`<h3 style="margin-block-end:.8rem">Spending by year</h3>${schedule({ compact: true, cols: [{ label: "Fiscal year" }, { label: "", w: "50%" }, { label: "Spent", num: true }], rows: trend.map((t) => ({ cells: [esc(t.y), bar(t.v || 0, tmax), t.v ? moneyWords(t.v) : ""] })) })}` : ""}
 </div></section>
 <section class="section"><div class="wrap">${progTable}</div></section>
 ${estTable ? `<section class="section"><div class="wrap">${estTable}</div></section>` : ""}
-${prof.length ? html`<section class="section"><div class="wrap"><div class="section-head"><h2>Professional services</h2><p>Outside expertise, including consultants, paid from this department's programs in ${latest}.</p></div>
+${prof.length ? html`<section class="section"><div class="wrap"><div class="section-head"><h2>Professional services</h2><p>Outside expertise, including consultants, paid from this department's programs in ${esc(latest)}.</p></div>
   ${schedule({ cols: [{ label: "Program" }, { label: "Professional services", num: true }, { label: "Source", num: true }], rows: prof.map((p) => ({ cells: [esc(p.program), money(p.v), receipt(p.source_url, p.page)] })) })}</div></section>` : ""}
 ${awards.length ? html`<section class="section"><div class="wrap">
   <div class="section-head"><h2>Contracts awarded</h2>
@@ -208,9 +208,9 @@ ${awards.length ? html`<section class="section"><div class="wrap">
   const notes = new Notes();
   const estTotal = estRows.reduce((s, r) => s + r.c1, 0);
   const cite = notes.cite({ url: estRows[0].source_url, label: `Estimates of the Program Expenditure and Revenue of the Consolidated Revenue Fund ${estYear}, gross expenditure summed from each department's program lines` });
-  const body = html`${pagehead({ crumbs: [["/", "Home"], ["/priorities/", "Priorities"], [null, `Estimates ${estYear}`]], title: `Budget estimates, ${estYear}`, lede: `What the province plans to spend this year: ${moneyWords(estTotal)} gross${cite}, set against last year's revised figures. The government reorganised departments in late 2025, so many names are new.` })}
+  const body = html`${pagehead({ crumbs: [["/", "Home"], ["/priorities/", "Priorities"], [null, `Estimates ${estYear}`]], title: `Budget estimates, ${esc(estYear)}`, lede: `What the province plans to spend this year: ${moneyWords(estTotal)} gross${cite}, set against last year's revised figures. The government reorganised departments in late 2025, so many names are new.` })}
 <section class="section"><div class="wrap">${schedule({
-    cols: [{ label: "Department" }, { label: `Estimate ${estYear}`, num: true }, { label: "Revised, year before", num: true }, { label: "Budget, year before", num: true }, { label: "Source", num: true }],
+    cols: [{ label: "Department" }, { label: `Estimate ${esc(estYear)}`, num: true }, { label: "Revised, year before", num: true }, { label: "Budget, year before", num: true }, { label: "Source", num: true }],
     rows: estRows.map((r) => ({ cells: [`<a href="/department/${D.slug(r.department)}/">${esc(r.department)}</a>`, moneyWords(r.c1), moneyWords(r.c2), moneyWords(r.c3), receipt(r.source_url, r.page)] })),
     foot: [{ cells: ["Total", moneyWords(estTotal), moneyWords(estRows.reduce((s, r) => s + r.c2, 0)), moneyWords(estRows.reduce((s, r) => s + r.c3, 0)), ""] }],
   })}</div></section>`;

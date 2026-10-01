@@ -18,7 +18,7 @@ export default defineConfig({
   worker: {
     name: cardsPreview ? "nlledger-cards-preview" : preview ? "nlledger-preview" : "nlledger",
     compatibilityDate: "2026-09-01",
-    ...(cardsPreview ? { limits: { cpuMs: 1000 } } : {}),
+    limits: { cpuMs: 1000 },
     entrypoint: "./worker.mjs",
     assets: {
       notFoundHandling: "404-page",
@@ -28,7 +28,7 @@ export default defineConfig({
     domains: cardsPreview ? ["cards-preview.nlledger.ca"] : preview ? [] : ["nlledger.ca"],
     workersDev: preview,
     previewUrls: false,
-    observability: { enabled: true },
+    observability: { enabled: true, redactQueryString: true },
     env: {
       ASSETS: bindings.assets(),
       ...(cardsPreview ? { SHARE_ORIGIN: { type: "text", value: "https://cards-preview.nlledger.ca" } } : {}),
@@ -38,6 +38,7 @@ export default defineConfig({
       // limit caps how many queries per minute, per Cloudflare location, may reach either.
       AI: bindings.ai({}),
       MEANING: bindings.vectorize({ name: "nl-ledger-meaning" }),
+      SHARE_RENDER_LIMIT: bindings.rateLimit({ namespace: "350", simple: { limit: 20, period: 60 } }),
       MEANING_LIMIT: bindings.rateLimit({ namespace: "346", simple: { limit: 30, period: 60 } }),
       // The feedback box (routes/feedback.js, NOTES.md "Feedback box"): notes are emailed from an address on the
       // domain, and one network address may post four times a minute. The two secrets are set once on the

@@ -1,7 +1,7 @@
 """Download every PPA contract-award report PDF from 2021 to now."""
 import re
 
-from common import CACHE, fetch, get_text, load_manifest, save_manifest
+from common import CACHE, cache_path, cache_write_text, fetch, get_text, load_manifest, save_manifest
 
 PAGES = [
     "https://www.gov.nl.ca/ppa/?page_id=2673",  # January to July 2021
@@ -15,6 +15,7 @@ PAGES = [
 
 
 def main() -> None:
+    cache_path(CACHE / "ppa" / "_links.txt")
     m = load_manifest()
     links: list[str] = []
     for page in PAGES:
@@ -27,8 +28,7 @@ def main() -> None:
         name = u.rsplit("/", 1)[1]
         fetch(u, CACHE / "ppa" / name, manifest=m)
     save_manifest(m)
-    (CACHE / "ppa").mkdir(parents=True, exist_ok=True)  # a fresh cache has no folder yet
-    (CACHE / "ppa" / "_links.txt").write_text("\n".join(links))
+    cache_write_text(CACHE / "ppa" / "_links.txt", "\n".join(links))
 
 
 if __name__ == "__main__":
